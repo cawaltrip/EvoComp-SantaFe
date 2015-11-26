@@ -65,7 +65,6 @@ int main(int argc, char **argv, char **envp) {
 
 	return 0;
 }
-
 std::vector<std::string> ParseCommandLine(int argc, char **argv) {
 	/* Vector to hold return values */
 	std::vector<std::string> filenames;
@@ -112,7 +111,6 @@ std::vector<std::string> ParseCommandLine(int argc, char **argv) {
 	}
 	return filenames;
 }
-
 std::string GetUsageString(std::string program_name) {
 	size_t found = program_name.find_last_of("/\\");
 	std::string usage = "Usage: " + program_name.substr(found + 1);

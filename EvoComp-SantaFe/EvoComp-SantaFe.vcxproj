@@ -147,7 +147,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="node.h" />
     <ClInclude Include="operator_types.h" />
+    <ClInclude Include="trail_map.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />

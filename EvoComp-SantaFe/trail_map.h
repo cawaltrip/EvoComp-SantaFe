@@ -26,15 +26,35 @@
 #pragma once
 
 #include <vector>
+/** 
+ * @enum	TrailData
+ * Represents the possible values in a cell.
+ */
+enum TrailData {
+	kUnvisitedEmpty, /**< An empty cell that hasn't been visited. */
+	kUnvisitedFood, /**< A cell with uneaten food. */
+	kVisitedEmpty, /**< An empty cell that's been visited. */
+	kVisitedFood /**< A cell with food that's been eaten. */
+};
 /**
  * @class	TrailMap
  * A structure that represents a map that an Ant will traverse while
  * collecting food and the total amount of food on the map.
- * @todo	"Objectify"/"Classify" this and remove direct access to variables.
  */
-struct TrailMap {
-	/** The map itself, referencable directly. */
-	std::vector<std::vector<char>> map_;
-	/** The number of total food on the map. */
-	size_t food_count_;
+class TrailMap {
+public:
+	/** 
+	 * Constructor requires a 2D vector of characters.  This vector gets
+	 * converted into `TrailData` items in the map.
+	 */
+	TrailMap(std::vector<std::vector<char>> map);
+	/** Explicitly set a cell's contents. */
+	void SetCell(size_t x, size_t y, TrailData contents);
+	/** Retrieve the value at a given point.  Doesn't check bounds. */
+	TrailData GetCell(size_t x, size_t y);
+	/** Return the total number eaten and uneaten food on the map. */
+	size_t GetTotalFoodCount();
+private:
+	std::vector<std::vector<TrailData>> map_;
+	size_t total_food_;
 };

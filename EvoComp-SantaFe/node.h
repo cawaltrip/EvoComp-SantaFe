@@ -23,6 +23,7 @@
  */
 #pragma once
 
+#include <random>
 #include <utility> /* std::pair */
 #include <vector>
 #include "operator_types.h"
@@ -143,13 +144,14 @@ public:
 	/** Sets the value of `children_` at the given index number. */
 	void SetChild(size_t child_number, Node *child);
 private:
-	/* Tree Structure */
+	/** 
+	 * Static reference to Mersenne Twister 19937 engine.
+	 */
+	std::mt19937 &GetEngine();
 	/** A pointer to the parent node or `nullptr` if the root of the tree */
 	Node *parent_;
 	/** Pointers to children nodes. */
 	std::vector<Node*> children_;
-
-	/* Node Data */
 	/** 
 	 * The operator type of the node.  This is used to determine whether the
 	 * node is terminal or nonterminal and for determining how to traverse 

@@ -20,7 +20,6 @@
 
 #include <deque>
 #include <iostream> /* Logging/Error reporting only */
-#include <random>
 #include <string> /* for std::to_string() which may not be needed. */
 #include "node.h"
 
@@ -65,9 +64,6 @@ std::string Node::ToString(bool latex) {
 }
 void Node::GenerateTree(size_t cur_depth, size_t max_depth,
 						Node *parent, bool full_tree) {
-	std::random_device rd;
-	std::mt19937 mt(rd());
-
 	OpType lower_bound, upper_bound;
 	parent_ = parent;
 
@@ -84,7 +80,7 @@ void Node::GenerateTree(size_t cur_depth, size_t max_depth,
 	}
 
 	std::uniform_int_distribution<int> d{ lower_bound, upper_bound };
-	op_ = static_cast<OpType>(d(mt));
+	op_ = static_cast<OpType>(d(GetEngine()));
 	size_t children_counter = 0;
 	children_.clear(); /** @todo	Will this damage crossover? */
 	switch (op_) {
@@ -113,12 +109,10 @@ void Node::GenerateTree(size_t cur_depth, size_t max_depth,
 	}
 }
 void Node::Mutate(double mutation_chance, size_t max_depth) {
-	std::random_device rd;
-	std::mt19937 mt(rd());
 	std::uniform_real_distribution<double> mut_dist{ 0,1 };
 	const size_t kMinimumTreeIncrease = 3;
 
-	if (mut_dist(mt) <= mutation_chance) {
+	if (mut_dist(GetEngine()) <= mutation_chance) {
 		OpType lower_bound, upper_bound;
 		if (IsTerminal()) {
 			lower_bound = OpType::kMoveForward;
@@ -128,7 +122,7 @@ void Node::Mutate(double mutation_chance, size_t max_depth) {
 			upper_bound = OpType::kIfFoodAhead;
 		}
 		std::uniform_int_distribution<int> d{ lower_bound, upper_bound };
-		op_ = static_cast<OpType>(d(mt));
+		op_ = static_cast<OpType>(d(GetEngine()));
 		size_t children_counter = 0;
 		children_.clear();
 		switch (op_) {
@@ -249,4 +243,9 @@ void Node::SetChild(size_t child_number, Node *child) {
 		children_[child_number] = child;
 	}
 	children_.push_back(child);
+}
+std::mt19937 &Node::GetEngine() {
+	static std::random_device rd;
+	static std::mt19937 mt(rd());
+	return mt;
 }

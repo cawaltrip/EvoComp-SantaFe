@@ -77,8 +77,10 @@ public:
 	 * to another of the same arity.
 	 * @param[in]	mutation_chance		The possibility that an individual 
 	 *									node will mutate.
+	 * @param[in]	max_depth			Max tree depth to help curb code 
+	 *									growth.
 	 */
-	void Mutate(double mutation_chance);
+	void Mutate(double mutation_chance, size_t max_depth);
 	/**
 	 * Evaluate the fitness of a node and its subtree.
 	 * @param[in]	map		A map with food for the Ant to collect.
@@ -151,7 +153,9 @@ private:
 	/** 
 	 * The operator type of the node.  This is used to determine whether the
 	 * node is terminal or nonterminal and for determining how to traverse 
-	 * the subtree. 
+	 * the subtree.  The depth is simply how far into the tree we are.  This 
+	 * is used to help curb code growth.
 	 */
 	OpType op_;
+	size_t depth_;
 };

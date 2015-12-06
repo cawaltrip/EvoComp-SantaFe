@@ -25,12 +25,15 @@
  *
  * @file
  * @date 23 November 2015
+ *
+ * @todo	Determine how and where to store Ant's position data.
  */
 
 #include <fstream>
 #include <iostream>
 #include <vector>
 #include <boost/program_options.hpp>
+#include "trail_map.h"
 namespace po = boost::program_options;
 
 /**
@@ -50,7 +53,6 @@ namespace po = boost::program_options;
   * @param[in]	program_name	Name of the exectued program (i.e, argv[0]).
   * @return	Returns a `std::string` of usage details with the name of the 
   *			calling program inserted into the string.
-  * @todo	Expand uage string into man page style syntax.
   */
  std::string GetUsageString(std::string program_name);
  /** 
@@ -60,8 +62,28 @@ namespace po = boost::program_options;
  * @param[in]	argv	List of command line arguments.
  * @param[in]	envp	Environment variables from user (Not currently used).
  */
+ /** 
+  * Returns a vector of the lines in the given file.  This is passed to the
+  * TrailMap to construct a new map object.
+  * @param[in]	filename	Name of the file to parse.
+  * @return	Returns a `std::vector<std::string>` containing the
+  *			contents of the file read in.
+  */
+std::vector<std::string> ParseDataFile(std::string filename);
+/** 
+ * Returns string representation of map.
+ * @param[in]	map		Map to print.
+ * @param[in]	latex	Add LaTeX wrappings or not.
+ * @return	Returns a `std::string` containing contents of the map.
+ */
+std::string PrintMap(std::vector<std::vector<char>> map);
+
 int main(int argc, char **argv, char **envp) {
 	std::vector<std::string> files = ParseCommandLine(argc, argv);
+	for (std::string f : files) {
+		TrailMap map(ParseDataFile(f));
+		std::cout << map.ToString(false) << std::endl << std::endl << std::endl;
+	}
 
 	return 0;
 }
@@ -74,7 +96,7 @@ std::vector<std::string> ParseCommandLine(int argc, char **argv) {
 	opts.add_options()
 		("help,h", "print this help and exit")
 		("verbose,v", "print extra logging information")
-		("input,i", po::value<std::vector<std::string>>(), 
+		("input,i", po::value<std::vector<std::string>>(),
 		 "specify input file(s)");
 	po::positional_options_description positional_opts;
 	positional_opts.add("input", -1);
@@ -97,7 +119,6 @@ std::vector<std::string> ParseCommandLine(int argc, char **argv) {
 	if (vm.count("input")) {
 		filenames = vm["input"].as<std::vector<std::string>>();
 		for (auto fn : filenames) {
-			std::cout << "Filename: " << fn << std::endl;
 			if (!(std::ifstream(fn).good())) {
 				std::cerr << fn << " not found!" << std::endl;
 				exit(EXIT_FAILURE);
@@ -117,4 +138,24 @@ std::string GetUsageString(std::string program_name) {
 	usage += " [options] input_file_1 [input_file_2...]";
 
 	return usage;
+}
+std::vector<std::string> ParseDataFile(std::string filename) {
+	std::ifstream inf;
+	std::string line;
+	std::vector<std::string> map_file_contents;
+
+	inf.open(filename);
+	if (!inf) {
+		std::cerr << "Failed to open file: " << filename << std::endl;
+		exit(EXIT_FAILURE);
+	}
+
+	/* Parse input file */
+	while (std::getline(inf, line)) {
+		map_file_contents.push_back(line);
+	}
+	return map_file_contents;
+}
+std::string PrintMap(TrailMap map, bool latex) {
+	return map.ToString(latex);
 }

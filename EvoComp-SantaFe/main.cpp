@@ -56,13 +56,6 @@ namespace po = boost::program_options;
   */
  std::string GetUsageString(std::string program_name);
  /** 
- * The main function. Calls the command line parser, calls the map parser,
- * creates and evolves the population and writes the results to file.
- * @param[in]	argc	Number of items in argv.
- * @param[in]	argv	List of command line arguments.
- * @param[in]	envp	Environment variables from user (Not currently used).
- */
- /** 
   * Returns a vector of the lines in the given file.  This is passed to the
   * TrailMap to construct a new map object.
   * @param[in]	filename	Name of the file to parse.

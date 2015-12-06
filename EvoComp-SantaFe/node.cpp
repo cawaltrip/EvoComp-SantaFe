@@ -160,10 +160,10 @@ size_t Node::Evaluate(TrailMap map) {
 }
 std::pair<Node*, size_t> Node::SelectNode(size_t countdown, bool nonterminal) {
 	std::deque<std::pair<Node*, size_t>> stack;
-	std::pair<Node*, size_t> current;
+	std::pair<Node*, size_t> curr;
 	bool done = false;
 
-	stack.push_front(std::make_pair(this, 0));
+	stack.emplace_front(std::make_pair(this, 0));
 
 	while (!done) {
 		if (stack.empty()) {
@@ -174,21 +174,21 @@ std::pair<Node*, size_t> Node::SelectNode(size_t countdown, bool nonterminal) {
 			std::cerr << "Countdown wrapped around!" << std::endl;
 			exit(EXIT_FAILURE);
 		}
-		current = stack.front();
+		curr = stack.front();
 		stack.pop_front();
-		if (countdown == 0 && nonterminal == current.first->IsNonterminal()) {
+		if (countdown == 0 && nonterminal == curr.first->IsNonterminal()) {
 			/* Found the correct node */
 			done = true;
 			break;
 		}
-		if (nonterminal == current.first->IsNonterminal()) {
+		if (nonterminal == curr.first->IsNonterminal()) {
 			--countdown;
 		}
-		for (size_t i = 0; i < current.first->children_.size(); ++i) {
-			stack.push_front(std::make_pair(current.first->children_[i], i));
+		for (size_t i = 0; i < curr.first->children_.size(); ++i) {
+			stack.emplace_front(std::make_pair(curr.first->children_[i], i));
 		}
 	}
-	return current;
+	return curr;
 }
 
 void Node::CountNodes(size_t &term_count, size_t &nonterm_count) {

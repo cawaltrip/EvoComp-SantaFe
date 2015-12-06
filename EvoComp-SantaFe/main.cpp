@@ -69,7 +69,7 @@ std::vector<std::string> ParseDataFile(std::string filename);
  * @param[in]	latex	Add LaTeX wrappings or not.
  * @return	Returns a `std::string` containing contents of the map.
  */
-std::string PrintMap(std::vector<std::vector<char>> map);
+std::string PrintMap(std::vector<std::vector<char>> map, bool latex);
 
 int main(int argc, char **argv, char **envp) {
 	std::vector<std::string> files = ParseCommandLine(argc, argv);

@@ -20,10 +20,12 @@
 
 #include "trail_map.h"
 
-TrailMap::TrailMap(std::vector<std::string> map_file_contents) {
-	row_count_ = map_file_contents.size();
+TrailMap::TrailMap(std::vector<std::string> map_file, size_t step_limit) {
+	current_steps_ = 0;
+	step_limit_ = step_limit;
+	row_count_ = map_file.size();
 	column_count_ = 0;
-	for (std::string s : map_file_contents) {
+	for (std::string s : map_file) {
 		if (s.length() > column_count_) {
 			column_count_ = s.length();
 		}
@@ -34,7 +36,7 @@ TrailMap::TrailMap(std::vector<std::string> map_file_contents) {
 	for (size_t i = 0; i < row_count_; ++i) {
 		map_[i].assign(column_count_, TrailData::kUnvisitedEmpty);
 		for (size_t j = 0; j < column_count_; ++j) {
-			map_[i][j] = ConvertCharToTrailData(map_file_contents[i][j]);
+			map_[i][j] = ConvertCharToTrailData(map_file[i][j]);
 		}
 	}
 }

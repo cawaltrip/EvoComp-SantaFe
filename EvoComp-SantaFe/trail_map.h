@@ -54,7 +54,7 @@ public:
 	 *									representing the line that was in the
 	 *									map data file.
 	 */
-	TrailMap(std::vector<std::string> map_file_contents);
+	TrailMap(std::vector<std::string> map_file, size_t step_limit);
 	/** Explicitly set a cell's contents. Checks bounds. */
 	void SetCell(size_t row, size_t column, TrailData data);
 	/** Retrieve the value at a given point.  Doesn't check bounds. */
@@ -98,6 +98,8 @@ private:
 	void SetTotalFoodCount();
 
 	std::vector<std::vector<TrailData>> map_;
+	size_t current_steps_;
+	size_t step_limit_;
 	size_t total_food_;
 	size_t row_count_;
 	size_t column_count_;

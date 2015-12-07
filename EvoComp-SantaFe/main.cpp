@@ -72,9 +72,27 @@ std::vector<std::string> ParseDataFile(std::string filename);
 std::string PrintMap(std::vector<std::vector<char>> map, bool latex);
 
 int main(int argc, char **argv, char **envp) {
+	/* Genetic Program Constants */
+	const size_t kEvolutionCount = 1000;
+	const size_t kElitismCount = 2;
+
+	/* Map Constants */
+	const size_t kStepLimit = 300;
+
+	/* Population Constants */
+	const size_t kPopulationSize = 100;
+	const double kMutationRate = 0.03;
+	const double kNonterminalCrossoverRate = 0.90;
+	const size_t kTournamentSize = 3;
+
+	/* Individual/Node Constants */
+	const size_t kTreeDepthMin = 3;
+	const size_t kTreeDepthMax = 6;
+
+	
 	std::vector<std::string> files = ParseCommandLine(argc, argv);
 	for (std::string f : files) {
-		TrailMap map(ParseDataFile(f));
+		TrailMap map(ParseDataFile(f), kStepLimit);
 		std::cout << map.ToString(false) << std::endl << std::endl << std::endl;
 	}
 

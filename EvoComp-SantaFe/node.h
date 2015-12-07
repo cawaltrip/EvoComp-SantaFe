@@ -147,6 +147,8 @@ public:
 	void SetParent(Node *parent);
 	/** Sets the value of `children_` at the given index number. */
 	void SetChild(size_t child_number, Node *child);
+	/** Returns the depth of this node in the tree. */
+	size_t GetCurrentDepth();
 private:
 	/**
 	 * A static random engine that can be shared throughout the entire class.

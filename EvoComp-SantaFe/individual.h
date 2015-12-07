@@ -118,7 +118,6 @@ public:
 	 * @param[in]	*root	New root node pointer.
 	 */
 	void SetRootNode(Node *root);
-
 private:
 	/**
 	 * A static random engine that can be shared throughout the entire class.
@@ -133,6 +132,7 @@ private:
 	 */
 	std::mt19937 &GetEngine();
 	Node *root_; /**< Root node of the solution tree. */
+	size_t original_max_depth_; /**< The original maximum size of the tree. */
 	double fitness_; /**< Raw fitness score. */
 	double weighted_fitness_; /**< Fitness score with parsimony penalty. */
 	size_t terminal_count_;	/**< Number of terminal nodes in the tree. */

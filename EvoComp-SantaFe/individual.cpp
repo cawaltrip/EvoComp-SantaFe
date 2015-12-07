@@ -25,17 +25,20 @@
 
 Individual::Individual() {
 	root_ = new Node;
+	original_max_depth_ = 0;
 	terminal_count_ = 0;
 	nonterminal_count_ = 0;
 	fitness_ = 0;
 	weighted_fitness_ = 0;
 }
 Individual::Individual(size_t depth_max, bool full_tree) : Individual() {
-	this->GenerateTree(depth_max, full_tree);
+	original_max_depth_ = depth_max;
+	GenerateTree(depth_max, full_tree);
 }
 Individual::Individual(const Individual &to_copy) {
 	root_ = new Node;
 	root_->Copy(to_copy.root_);
+	original_max_depth_ = to_copy.original_max_depth_;
 	terminal_count_ = to_copy.terminal_count_;
 	nonterminal_count_ = to_copy.nonterminal_count_;
 	fitness_ = to_copy.fitness_;
@@ -54,7 +57,7 @@ void Individual::GenerateTree(size_t depth_max, bool full_tree) {
 	CalculateTreeSize();
 }
 void Individual::Mutate(double mutation_rate) {
-	root_->Mutate(mutation_rate);
+	root_->Mutate(mutation_rate, original_max_depth_);
 }
 std::pair<Node*, size_t> Individual::GetRandomNode(bool nonterminal) {
 	size_t upper_bound;
@@ -97,7 +100,7 @@ double Individual::GetWeightedFitness() {
 	return weighted_fitness_;
 }
 size_t Individual::GetTreeSize() {
-	return GetTerminalCount() + GetNonterminalCount()
+	return GetTerminalCount() + GetNonterminalCount();
 }
 size_t Individual::GetTerminalCount() {
 	return terminal_count_;

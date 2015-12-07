@@ -245,6 +245,9 @@ void Node::SetChild(size_t child_number, Node *child) {
 	}
 	children_.push_back(child);
 }
+size_t Node::GetCurrentDepth() {
+	return depth_;
+}
 std::mt19937 &Node::GetEngine() {
 	static std::random_device rd;
 	static std::mt19937 mt(rd());

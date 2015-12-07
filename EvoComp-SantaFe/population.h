@@ -26,6 +26,7 @@
 #include <random>
 #include <vector>
 #include "ant.h"
+#include "individual.h"
 #include "trail_map.h"
 
 /**
@@ -209,7 +210,7 @@ private:
 	 *								population and a subtree of this tree is
 	 *								spliced into `parent1`.
 	 */
-	void Crossover(Ant *parent1, Ant *parent2);
+	void Crossover(Individual *parent1, Individual *parent2);
 	/** 
 	 * Implements tournament selection using the weighted fitness score.  The
 	 * weighted fitness score exists because parsimony pressure is used to
@@ -284,7 +285,8 @@ private:
 	 */
 	std::mt19937 &GetEngine();
 
-	std::vector<Ant> pop_;
+	std::vector<Individual> pop_;
+	Ant ant;
 	std::vector<TrailMap> maps_;
 	double mutation_rate_;
 	double nonterminal_crossover_rate_;

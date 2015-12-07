@@ -43,9 +43,9 @@
  */
 class Node {
 public:
-	/* Node functions */
 	/** 
 	 * Creates a new version of a node, given a reference node.
+	 *
 	 * @todo	Determine whether I still need a pointer to the source node. 
 	 */
 	void Copy(Node *to_copy);
@@ -53,12 +53,12 @@ public:
 	void Erase();
 	/** 
 	 * A text representation of a node and its subtree.
+	 *
 	 * @param[in]	latex	If true, inserts LaTeX formatting.
+	 *
 	 * @return	Returns the tree representation as a `std::string`.
 	 */
 	std::string ToString(bool latex = false);
-
-	/* Tree Functions */
 	/**
 	 * Generates a random tree.
 	 * @param[in]	cur_depth	The current depth of the tree.
@@ -76,6 +76,7 @@ public:
 	/**
 	 * Recursively traverses the tree and randomly changes a node's operator 
 	 * to another of the same arity.
+	 *
 	 * @param[in]	mutation_chance		The possibility that an individual 
 	 *									node will mutate.
 	 * @param[in]	max_depth			Max tree depth to help curb code 
@@ -99,11 +100,10 @@ public:
 	 *			index of the node in the node's parent's `children_` vector.
 	 */
 	std::pair<Node*, size_t> SelectNode(size_t countdown, bool nonterminal);
-
-	/* Public Helper Functions */
 	/** 
 	 * Recursively iterates through the tree and counts the number of nodes
 	 * encountered.
+	 *
 	 * @param[out]	term_count		The number of terminal nodes in the tree.
 	 * @param[out]	nonterm_count	The number of nonterminal nodes in the 
 	 *								tree.
@@ -116,16 +116,18 @@ public:
 	 */
 	bool IsTerminal();
 	/**
-	* Determines if the current node is nonterminal.  Checks the operator type
-	* of the node to determine if nonterminal or not.
-	* @return	True if a nonterminal operator type.
-	*/
+	 * Determines if the current node is nonterminal.  Checks the operator type
+	 * of the node to determine if nonterminal or not.
+	 *
+	 * @return	True if a nonterminal operator type.
+	 */
 	bool IsNonterminal();
 	/** 
 	 * Recursively iterate through the tree and set the parent point of each
 	 * node.  This is useful after the crossover function has completed to
 	 * make sure that the tree can be traversed in both directions and also
 	 * allows trees to leave scope and have their memory freed.
+	 *
 	 * @param[in]	parent	Pointer to the parent.
 	 */
 	void CorrectParents(Node *parent);
@@ -135,7 +137,9 @@ public:
 	Node* GetParent();
 	/** 
 	 * Returns the child node of the node based on the index number given.
+	 *
 	 * @param[in]	child_number	The index number of the child to return.
+	 *
 	 * @return	The child node at the given index and `nullptr` otherwise.
 	 */
 	Node* GetChild(size_t child_number);
@@ -144,8 +148,16 @@ public:
 	/** Sets the value of `children_` at the given index number. */
 	void SetChild(size_t child_number, Node *child);
 private:
-	/** 
-	 * Static reference to Mersenne Twister 19937 engine.
+	/**
+	 * A static random engine that can be shared throughout the entire class.
+	 * Based on the idea found in:
+	 * http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3551.pdf
+	 * This class uses the well-defined STL Mersenne Twister engine, mt19937.
+	 * The first time this method is called, a std::mt19937 engine is
+	 * initialized and seeded by `std::random_device` and is returned.  All
+	 * subsequent calls return the originally created engine.
+	 *
+	 * @return	A Mersenne Twister Engine seeded by `std::random_device`.
 	 */
 	std::mt19937 &GetEngine();
 	/** A pointer to the parent node or `nullptr` if the root of the tree */

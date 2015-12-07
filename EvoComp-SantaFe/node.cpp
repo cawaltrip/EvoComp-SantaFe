@@ -19,7 +19,7 @@
  */
 
 #include <deque>
-#include <iostream> /* Logging/Error reporting only */
+#include <iostream> /* Logging/error reporting only */
 #include <string> /* for std::to_string() which may not be needed. */
 #include "node.h"
 
@@ -60,6 +60,7 @@ void Node::Erase() {
 	delete this;
 }
 std::string Node::ToString(bool latex) {
+	/** @todo	Implement Node::ToString()! */
 	return "Node::ToString is a stub currently";
 }
 void Node::GenerateTree(size_t cur_depth, size_t max_depth,

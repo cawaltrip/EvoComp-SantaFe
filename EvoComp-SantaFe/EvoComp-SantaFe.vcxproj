@@ -148,14 +148,17 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ant.h" />
+    <ClInclude Include="individual.h" />
     <ClInclude Include="node.h" />
     <ClInclude Include="operator_types.h" />
     <ClInclude Include="population.h" />
     <ClInclude Include="trail_map.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="individual.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="node.cpp" />
+    <ClCompile Include="population.cpp" />
     <ClCompile Include="trail_map.cpp" />
   </ItemGroup>
   <ItemGroup>

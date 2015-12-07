@@ -49,6 +49,10 @@ public:
 	 * and converted into `TrailData` items in the map.  Any rows that are
 	 * uneven have blank unvisited cells appended to the end of them to make
 	 * the map width uniform.
+	 *
+	 * @param[in]	map_file_contents	A vector where each index is a string
+	 *									representing the line that was in the
+	 *									map data file.
 	 */
 	TrailMap(std::vector<std::string> map_file_contents);
 	/** Explicitly set a cell's contents. Checks bounds. */
@@ -58,8 +62,11 @@ public:
 	/** Return the total number eaten and uneaten food on the map. */
 	size_t GetTotalFoodCount();
 	/** Return the map as a string.
+	 *
 	 * @param[in]	latex	Add formatting for placing in a LaTeX file.
+	 *
 	 * @return	`std::string` with one row per line representing the map.
+	 *
 	 * @todo	Add LaTeX wrappings.
 	 */
 	std::string ToString(bool latex);
@@ -68,16 +75,20 @@ private:
 	 * Looks up what `TrailData` is represented by a certain character.  If 
 	 * an invalid character is passed, the default is to return
 	 * `TrailData::kUnvisitedEmpty`.
+	 *
 	 * @param[in]	c	Character to match.
+	 *
 	 * @return `TrailData` represented by the input.
 	 */
 	TrailData ConvertCharToTrailData(char c);
 	/**
-	* Looks up what character represents a given `TrailData` item.  If an
-	* invalid `TrailData` parameter is passed, the default is to return '?'.
-	* @param[in]	d	`TrailData` to match.
-	* @return `char` representing the input.
-	*/
+	 * Looks up what character represents a given `TrailData` item.  If an
+	 * invalid `TrailData` parameter is passed, the default is to return '?'.
+	 *
+	 * @param[in]	d	`TrailData` to match.
+	 *
+	 * @return `char` representing the input.
+	 */
 	char ConvertTrailDataToChar(TrailData d);
 	/**
 	* Determine the total number of food in a given map.  This will only need

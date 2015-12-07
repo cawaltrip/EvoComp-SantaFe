@@ -23,6 +23,7 @@
  */
 #pragma once
 
+#include <random>
 #include <vector>
 #include "ant.h"
 #include "trail_map.h"
@@ -42,10 +43,29 @@ public:
 	 * defined in the main program.  Also passes the other variables that
 	 * are needed by the `Ant` and `Node` classes to those respective classes.
 	 *
+	 * @param[in]	population_size				Number of individuals in the 
+	 *											population.
+	 * @param[in]	mutation_rate				How often a single node will 
+	 *											mutate.
+	 * @param[in]	nonterminal_crossover_rate	Adjustable variable used with
+	 *											the 90/10 nonterminal/terminal
+	 *											rate.
+	 * @param[in]	tournament_size				The number of individuals 
+	 *											compared when selecting an 
+	 *											individual for crossover.
+	 * @param[in]	depth_min					The lower bound on maximum 
+	 *											tree size.
+	 * @param[in]	depth_max					The upper bound on maximum 
+	 *											tree size.
+	 * @param[in]	maps						Vector of the different map 
+	 *											files that were read in.
+	 *
 	 * @todo	Determine just what variables need to be passed to the
 	 *			different classes.
 	 */
-	Population();
+	Population(size_t population_size, double mutation_rate, 
+			   double nonterminal_crossover_rate, size_t tournament_size, 
+			   size_t depth_min, size_t depth_max, std::vector<TrailMap> maps);
 	/** 
 	 * The evolve function is the wrapper for the different stages of
 	 * evolution for the genetic program.  Specifically, `Evolve()` selects
@@ -59,6 +79,7 @@ public:
 	 *								currently isn't used and an elitism of
 	 *								two individuals is hardcoded in the
 	 *								`Elitism()` function.
+	 *
 	 * @todo	Properly implement Elitism.  Will require sorting the entire
 	 *			population.
 	 */
@@ -68,6 +89,7 @@ public:
 	 * 
 	 * @param[in]	include_fitness	Include the fitness for each individual.
 	 * @param[in]	latex			Wrap LaTeX code around the output.
+	 *
 	 * @return	The `ToString()` of every individual delimited by newlines.
 	 */
 	std::string ToString(bool include_fitness, bool latex);
@@ -77,6 +99,7 @@ public:
 	 *
 	 * @param[in]	include_fitness	Include the fitness for each individual.
 	 * @param[in]	latex			Wrap LaTeX code around the output.
+	 *
 	 * @return	The `ToString()` of the individual with the best raw fitness.
 	 */
 	std::string BestSolutionToString(bool include_fitness, bool latex);
@@ -86,61 +109,72 @@ public:
 	 *
 	 * @param[in]	include_fitness	Include the fitness for each individual.
 	 * @param[in]	latex			Wrap LaTeX code around the output.
+	 *
 	 * @return	The `ToString()` of the individual with the best raw fitness.
 	 */
 	std::string BestWeightedToString(bool include_fitness, bool latex);
 
 	/**
 	 * Returns the number of nodes in the largest tree.
+	 *
 	 * @return	The number of nodes in the largest tree (not the index of the
 	 *			individual in the population).
 	 */
 	size_t GetLargestTreeSize();
 	/**
 	 * Returns the number of nodes in the smallest tree.
+	 *
 	 * @return	The number of nodes in the smallest tree (not the index of the
 	 *			individual in the population).
 	 */
 	size_t GetSmallestTreeSize();
 	/**
 	 * Returns the average number of nodes in a tree.
+	 *
 	 * @return	The average number of nodes in the trees.
 	 */
 	size_t GetAverageTreeSize();
 	/**
 	 * Returns the total number of nodes from all trees.
+	 *
 	 * @return	The total number of nodes from all trees in the population.
 	 */
 	size_t GetTotalNodeCount();
 	/**
 	 * Returns the best raw fitness score.
+	 *
 	 * @return	The best raw fitness score.
 	 */
 	double GetBestFitness();
 	/**
 	 * Returns the worst raw fitness score.
+	 *
 	 * @return	The worst raw fitness score.
 	 */
 	double GetWorstFitness();
 	/**
 	 * Returns the average raw fitness score across all individuals in the 
 	 * population.
+	 *
 	 * @return	The average raw fitness score.
 	 */
 	double GetAverageFitness();
 	/**
 	 * Returns the best weighted fitness score.
+	 *
 	 * @return	The best weighted fitness score.
 	 */
 	double GetBestWeightedFitness();
 	/**
 	 * Returns the worst weighted fitness score.
+	 *
 	 * @return	The worst weighted fitness score.
 	 */
 	double GetWorstWeightedFitness();
 	/**
 	 * Returns the average weighted fitness score across all individuals in
 	 * the population.
+	 *
 	 * @return	The average weighted fitness score.
 	 */
 	double GetAverageWeightedFitness();
@@ -188,6 +222,7 @@ private:
 	 * generation.
 	 *
 	 * @param[in]	elite_count		The number of individuals to return.
+	 *
 	 * @todo	The `elite_count` variable is entirely ignored and only the
 	 *			two best individuals are returned.  This should be corrected
 	 *			and will involve sorting the entire population first.
@@ -236,6 +271,18 @@ private:
 	 * variables.
 	 */
 	void CalculateTreeSize();
+	/**
+	 * A static random engine that can be shared throughout the entire class.
+	 * Based on the idea found in:
+	 * http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3551.pdf
+	 * This class uses the well-defined STL Mersenne Twister engine, mt19937.
+	 * The first time this method is called, a std::mt19937 engine is
+	 * initialized and seeded by `std::random_device` and is returned.  All
+	 * subsequent calls return the originally created engine.
+	 *
+	 * @return	A Mersenne Twister Engine seeded by `std::random_device`.
+	 */
+	std::mt19937 &GetEngine();
 
 	std::vector<Ant> pop_;
 	std::vector<TrailMap> maps_;

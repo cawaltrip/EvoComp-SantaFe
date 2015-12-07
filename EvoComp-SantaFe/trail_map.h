@@ -26,12 +26,31 @@
 #pragma once
 
 #include <vector>
+/**
+ * @enum	Direction
+ * Represents the cardinal directions that the ant can be facing.
+ */
+enum class Direction {
+	kNorth,
+	kEast,
+	kSouth,
+	kWest
+};
+ /** 
+ * @struct	Ant
+ * Simple structure to represent location of the Ant at a given time.
+ */
+struct Ant {
+	Ant();	/**< Constructor sets ant's start position and direction. */
+	size_t x;	/**< The column number the ant is on. */
+	size_t y;	/**< The row number the ant is on. */
+	Direction direction; /**< The direction the ant is facing. */
+};
 /** 
  * @enum	TrailData
  * Represents the possible values in a `TrailMap` cell.
  */
 enum class TrailData {
-	kAntPosition,		/**< The ant's current position. */
 	kUnvisitedEmpty,	/**< An empty cell that hasn't been visited. */
 	kUnvisitedFood,		/**< A cell with uneaten food. */
 	kVisitedEmpty,		/**< An empty cell that's been visited. */
@@ -39,8 +58,9 @@ enum class TrailData {
 };
 /**
  * @class	TrailMap
- * A structure that represents a map that an Ant will traverse while
- * collecting food and the total amount of food on the map.
+ * A class that represents a map that an Ant will traverse while collecting
+ * food and the total amount of food on the map.  Also responsible for
+ * traversing the map and updating the ant's position.
  */
 class TrailMap {
 public:
@@ -59,7 +79,7 @@ public:
 	void SetCell(size_t row, size_t column, TrailData data);
 	/** Retrieve the value at a given point.  Doesn't check bounds. */
 	TrailData GetCell(size_t row, size_t column);
-	/** Return the total number eaten and uneaten food on the map. */
+	/** Return the total number of food on the map. */
 	size_t GetTotalFoodCount();
 	/** Return the map as a string.
 	 *
@@ -70,6 +90,14 @@ public:
 	 * @todo	Add LaTeX wrappings.
 	 */
 	std::string ToString(bool latex);
+	/** Moves the ant forward on the map */
+	void MoveForward();
+	/** Turns the ant left (anticlockwise) */
+	void TurnLeft();
+	/** Turns the ant right (clockwise) */
+	void TurnRight();
+	/** Returns the status of uneaten food being ahead of the ant */
+	bool IsFoodAhead();
 private:
 	/** 
 	 * Looks up what `TrailData` is represented by a certain character.  If 
@@ -96,11 +124,13 @@ private:
 	* food count is fixed.
 	*/
 	void SetTotalFoodCount();
-
 	std::vector<std::vector<TrailData>> map_;
 	size_t current_steps_;
 	size_t step_limit_;
-	size_t total_food_;
+	size_t consumed_food_;
+	size_t uneaten_food_;
 	size_t row_count_;
 	size_t column_count_;
+	Ant ant_;
+
 };

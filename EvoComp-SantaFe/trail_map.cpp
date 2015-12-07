@@ -139,6 +139,9 @@ bool TrailMap::IsFoodAhead() {
 	}
 	return false;
 }
+bool TrailMap::HasStepsRemaining() {
+	return current_steps_ < step_limit_;
+}
 TrailData TrailMap::ConvertCharToTrailData(char c) {
 	switch (c) {
 	case '_':

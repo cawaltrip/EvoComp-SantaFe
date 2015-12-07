@@ -98,6 +98,8 @@ public:
 	void TurnRight();
 	/** Returns the status of uneaten food being ahead of the ant */
 	bool IsFoodAhead();
+	/** Returns whether the ant has any steps left to take */
+	bool HasStepsRemaining();
 private:
 	/** 
 	 * Looks up what `TrailData` is represented by a certain character.  If 

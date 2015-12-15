@@ -168,7 +168,7 @@ void Population::Crossover(Individual *parent1, Individual *parent2) {
 	} else {
 		Node *parent = c1.first->GetParent();
 		c2.first->SetParent(parent);
-		if (c1.first->GetChild(c1.second)) {
+		if (parent->GetChild(c1.second)) {
 			parent->GetChild(c1.second)->Erase();
 			parent->SetChild(c1.second, c2.first);
 		} else {
@@ -190,7 +190,7 @@ size_t Population::SelectIndividual() {
 		do {
 			challenger = d(GetEngine());
 		} while (winner != challenger);
-		if (pop_[challenger].GetWeightedFitness() < 
+		if (pop_[challenger].GetWeightedFitness() > 
 			pop_[winner].GetWeightedFitness()) {
 			winner = challenger;
 		}
@@ -280,6 +280,7 @@ std::mt19937 &Population::GetEngine() {
 }
 void Population::Sort() {
 	std::sort(pop_.begin(), pop_.end());
+	std::reverse(pop_.begin(), pop_.end());
 	best_index_ = 0;
 	best_weighted_index_ = 0;
 	for (size_t i = 1; i < pop_.size(); ++i) {

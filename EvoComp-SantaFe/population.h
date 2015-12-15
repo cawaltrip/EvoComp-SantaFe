@@ -274,6 +274,8 @@ private:
 	/** 
 	 * Sort the population and make sure the indexes of best and worst
 	 * individuals are updated.
+	 *
+	 * @todo	This is incredibly inefficient currently!
 	 */
 	void Sort();
 	std::vector<Individual> pop_;

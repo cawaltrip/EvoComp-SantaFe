@@ -75,7 +75,7 @@ std::string PrintMap(std::vector<std::vector<char>> map, bool latex);
 
 int main(int argc, char **argv, char **envp) {
 	/* Genetic Program Constants */
-	const size_t kEvolutionCount = 1000;
+	const size_t kEvolutionCount = 100;
 	const size_t kElitismCount = 2;
 
 	/* Map Constants */
@@ -105,7 +105,14 @@ int main(int argc, char **argv, char **envp) {
 	}
 	Population pop(kPopulationSize, kMutationRate, kNonterminalCrossoverRate,
 				   kTournamentSize, kTreeDepthMin, kTreeDepthMax, maps);
-	std::cout << pop.ToString(true, false);
+	//std::cout << pop.ToString(true, false);
+
+	for (size_t i = 0; i < kEvolutionCount; ++i) {
+		pop.Evolve(kElitismCount);
+		if (i % 10 == 0) {
+			std::clog << pop.BestSolutionToString(true, false) << "\n";
+		}
+	}
 
 	return 0;
 }

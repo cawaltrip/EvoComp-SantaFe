@@ -53,14 +53,15 @@ void Node::Erase() {
 std::string Node::ToString(bool latex) {
 	switch (op_) {
 	case OpType::kProg3:
-		return("(" + children_[0]->ToString(latex) + ")\n" +
-			   "(" + children_[1]->ToString(latex) + ")\n" +
+		return("(" + children_[0]->ToString(latex) + ") " +
+			   "(" + children_[1]->ToString(latex) + ") " +
 			   "(" + children_[2]->ToString(latex) + ")");
 	case OpType::kProg2:
-		return("(" + children_[0]->ToString(latex) + ")\n" +
+		return("(" + children_[0]->ToString(latex) + ") " +
 			   "(" + children_[1]->ToString(latex) + ")");
 	case OpType::kIfFoodAhead:
-		return("{" + children_[0]->ToString(latex) + "}");
+		return("{" + children_[0]->ToString(latex) + "} " +
+			   "{" + children_[1]->ToString(latex) + "}");
 	case OpType::kMoveForward:
 		return "^";
 	case OpType::kTurnLeft:
@@ -139,6 +140,7 @@ void Node::Mutate(double mutation_chance, size_t max_depth) {
 		case OpType::kProg2:
 		case OpType::kIfFoodAhead:
 			children_counter += 2;
+			children_.resize(children_counter);
 			for (size_t i = 0; i < children_counter; ++i) {
 				Node *child = new Node;
 				children_[i] = child;
@@ -219,7 +221,6 @@ std::pair<Node*, size_t> Node::SelectNode(size_t countdown, bool nonterminal) {
 	}
 	return curr;
 }
-
 void Node::CountNodes(size_t &term_count, size_t &nonterm_count) {
 	switch (op_) {
 	case OpType::kProg3:
@@ -237,7 +238,6 @@ void Node::CountNodes(size_t &term_count, size_t &nonterm_count) {
 		break;
 	}
 }
-
 bool Node::IsNonterminal() {
 	switch (op_) {
 	case OpType::kProg3:
@@ -247,11 +247,9 @@ bool Node::IsNonterminal() {
 	}
 	return false;
 }
-
 bool Node::IsTerminal() {
 	return !IsNonterminal();
 }
-
 void Node::CorrectNodes(Node *parent, size_t depth) {
 	this->parent_ = parent;
 	this->depth_ = depth;
@@ -261,7 +259,6 @@ void Node::CorrectNodes(Node *parent, size_t depth) {
 		}
 	}
 }
-
 Node* Node::GetParent() {
 	return parent_;
 }

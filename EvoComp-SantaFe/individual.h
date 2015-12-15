@@ -41,9 +41,7 @@ public:
 	 * root node of the tree.
 	 */
 	Individual();
-	/** 
-	 * `Individual` class constructor that also generates the tree.
-	 */
+	/** `Individual` class constructor that also generates the tree. */
 	Individual(size_t depth_max, bool full_tree);
 	/** 
 	 * `Individual` class copy constructor.  This copy constructor creates a 
@@ -51,9 +49,7 @@ public:
 	 * the pointers to all the `parent_` variables afterwards.
 	 */
 	Individual(const Individual &to_copy);
-	/** 
-	 * Call `root_->Erase()` to delete the entire solution tree.
-	 */
+	/** Call `root_->Erase()` to delete the entire solution tree. */
 	void Erase();
 	/** 
 	 * Create a `std::string` of the tree.  Optionally LaTeX functions can be
@@ -97,7 +93,6 @@ public:
 	 * necessary after copying the tree during the crossover operation.
 	 */
 	void CorrectTree();
-
 	/** Return the fitness of the Individual */
 	double GetFitness();
 	/** Return the weighted fitness of the Individual */
@@ -116,35 +111,17 @@ public:
 	 * @param[in]	*root	New root node pointer.
 	 */
 	void SetRootNode(Node *root);
-	/**
-	* @function Individual ==
-	* @relates Individual
-	*/
+	/** Compare whether two individuals are the same using raw fitness */
 	bool operator==(const Individual &rhs);
-	/**
-	* @function Individual !=
-	* @relates Individual
-	*/
+	/** Compare whether two individuals aren't the same using raw fitness */
 	bool operator!=(const Individual &rhs);
-	/**
-	* @function Individual <
-	* @relates Individual
-	*/
+	/** Compare the left individual to the right using their raw fitnesses */
 	bool operator<(const Individual &rhs);
-	/**
-	* @function Individual <=
-	* @relates Individual
-	*/
+	/** Compare the left individual to the right using their raw fitnesses */
 	bool operator<=(const Individual &rhs);
-	/**
-	* @function Individual >
-	* @relates Individual
-	*/
+	/** Compare the left individual to the right using their raw fitnesses */
 	bool operator>(const Individual &rhs);
-	/**
-	* @function Individual >=
-	* @relates Individual
-	*/
+	/** Compare the left individual to the right using their raw fitnesses */
 	bool operator>=(const Individual &rhs);
 private:
 	/**

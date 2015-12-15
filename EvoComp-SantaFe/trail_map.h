@@ -77,9 +77,11 @@ public:
 	 * uneven have blank unvisited cells appended to the end of them to make
 	 * the map width uniform.
 	 *
-	 * @param[in]	map_file_contents	A vector where each index is a string
-	 *									representing the line that was in the
-	 *									map data file.
+	 * @param[in]	map_file		A vector where each index is a string
+	 *								representing the line that was in the
+	 *								map data file.
+	 * @param[in]	step_limit		The maximum number of actions the Ant can
+	 *								make in a single evaluation run.
 	 */
 	TrailMap(std::vector<std::string> map_file, size_t step_limit);
 	/** Explicitly set a cell's contents. Checks bounds. */

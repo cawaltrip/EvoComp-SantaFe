@@ -31,6 +31,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <string>
 #include <vector>
 #include <boost/program_options.hpp>
 #include "trail_map.h"
@@ -93,7 +94,7 @@ int main(int argc, char **argv, char **envp) {
 	std::vector<std::string> files = ParseCommandLine(argc, argv);
 	for (std::string f : files) {
 		TrailMap map(ParseDataFile(f), kStepLimit);
-		std::cout << PrintMap(map, false);
+		std::cout << map.ToString(false);
 		std::cout << std::endl << std::endl;
 	}
 
@@ -167,7 +168,4 @@ std::vector<std::string> ParseDataFile(std::string filename) {
 		map_file_contents.push_back(line);
 	}
 	return map_file_contents;
-}
-std::string PrintMap(TrailMap map, bool latex) {
-	return map.ToString(latex);
 }

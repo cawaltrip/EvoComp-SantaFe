@@ -35,6 +35,7 @@
 #include <vector>
 #include <boost/program_options.hpp>
 #include "trail_map.h"
+#include "population.h"
 namespace po = boost::program_options;
 
 /**
@@ -98,11 +99,13 @@ int main(int argc, char **argv, char **envp) {
 	}
 
 	std::vector<std::string> files = ParseCommandLine(argc, argv);
+	std::vector<TrailMap> maps;
 	for (std::string f : files) {
-		TrailMap map(ParseDataFile(f), kStepLimit);
-		std::cout << map.ToString(false);
-		std::cout << std::endl << std::endl;
+		maps.emplace_back(TrailMap(ParseDataFile(f), kStepLimit));
 	}
+	Population pop(kPopulationSize, kMutationRate, kNonterminalCrossoverRate,
+				   kTournamentSize, kTreeDepthMin, kTreeDepthMax, maps);
+	std::cout << pop.ToString(true, false);
 
 	return 0;
 }

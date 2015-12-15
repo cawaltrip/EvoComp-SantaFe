@@ -81,9 +81,14 @@ void Population::Evolve(size_t elitism_count) {
 	CalculateFitness();
 }
 std::string Population::ToString(bool include_fitness, bool latex) {
-	std::string population_string;
-	
-	return population_string;
+	std::stringstream ss;
+	for (size_t i = 0; i < pop_.size(); ++i) {
+		if (include_fitness) {
+			ss << pop_[i].GetFitness() << " ==> ";
+		}
+		ss << pop_[i].ToString(latex) << "\n";
+	}
+	return ss.str();
 }
 std::string Population::BestSolutionToString(bool include_fitness,
 											 bool latex) {

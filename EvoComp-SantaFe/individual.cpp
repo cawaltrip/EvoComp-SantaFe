@@ -90,13 +90,15 @@ void Individual::CalculateFitness(std::vector<TrailMap> maps) {
 		while (map.HasActionsRemaining()) {
 			root_->Evaluate(map);
 		}
-		fitness_ += static_cast<double>(map.GetConsumedFoodCount() /
-										map.GetTotalFoodCount());
+		//fitness_ += static_cast<double>(map.GetConsumedFoodCount() /
+		//								map.GetTotalFoodCount());
+		fitness_ += static_cast<double>(map.GetConsumedFoodCount());
 	}
 	fitness_ = fitness_ / maps.size();
 }
 void Individual::CalculateWeightedFitness(double parsimony_coefficient) {
 	/** @todo	Once figuring out regular fitness this will be easy. */
+	weighted_fitness_ = fitness_;
 }
 void Individual::CorrectTree() {
 	root_->CorrectParents(nullptr);

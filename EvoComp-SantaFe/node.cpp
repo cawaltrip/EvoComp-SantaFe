@@ -21,33 +21,34 @@
 #include <deque>
 #include <iostream> /* Logging/error reporting only */
 #include <string> /* for std::to_string() which may not be needed. */
+#include <sstream>
 #include "node.h"
 
 void Node::Copy(Node *to_copy) {
 	parent_ = to_copy->parent_;
 	op_ = to_copy->op_;
 
+	children_.clear();
+
 	switch (op_) {
 	case OpType::kProg2:
+		children_.resize(2);
 		for (size_t i = 0; i < 2; ++i) {
 			children_[i] = new Node;
 			children_[i]->Copy(to_copy->children_[i]);
 		}
 		break;
 	case OpType::kProg3:
+		children_.resize(3);
 		for (size_t i = 0; i < 3; ++i) {
 			children_[i] = new Node;
 			children_[i]->Copy(to_copy->children_[i]);
 		}
 		break;
 	case OpType::kIfFoodAhead:
+		children_.resize(1);
 		children_[0] = new Node;
 		children_[0]->Copy(to_copy->children_[0]);
-		break;
-	case OpType::kMoveForward:
-	case OpType::kTurnLeft:
-	case OpType::kTurnRight:
-		children_.clear();
 		break;
 	}
 }
@@ -60,8 +61,25 @@ void Node::Erase() {
 	delete this;
 }
 std::string Node::ToString(bool latex) {
-	/** @todo	Implement Node::ToString()! */
-	return "Node::ToString is a stub currently";
+	switch (op_) {
+	case OpType::kProg3:
+		return("(" + children_[0]->ToString(latex) + ")\n" +
+			   "(" + children_[1]->ToString(latex) + ")\n" +
+			   "(" + children_[2]->ToString(latex) + ")");
+	case OpType::kProg2:
+		return("(" + children_[0]->ToString(latex) + ")\n" +
+			   "(" + children_[1]->ToString(latex) + ")");
+	case OpType::kIfFoodAhead:
+		return("{" + children_[0]->ToString(latex) + "}");
+	case OpType::kMoveForward:
+		return "^";
+	case OpType::kTurnLeft:
+		return "<";
+	case OpType::kTurnRight:
+		return ">";
+	default:
+		return "!";
+	}
 }
 void Node::GenerateTree(size_t cur_depth, size_t max_depth,
 						Node *parent, bool full_tree) {
@@ -152,28 +170,28 @@ void Node::Mutate(double mutation_chance, size_t max_depth) {
 }
 void Node::Evaluate(TrailMap &map) {
 	switch (op_) {
-	case kProg3:
+	case OpType::kProg3:
 		for (size_t i = 0; i < 3; ++i) {
 			children_[i]->Evaluate(map);
 		}
 		break;
-	case kProg2:
+	case OpType::kProg2:
 		for (size_t i = 0; i < 2; ++i) {
 			children_[i]->Evaluate(map);
 		}
 		break;
-	case kIfFoodAhead:
+	case OpType::kIfFoodAhead:
 		if (map.IsFoodAhead()) {
 			children_.front()->Evaluate(map);
 		}
 		break;
-	case kMoveForward:
+	case OpType::kMoveForward:
 		map.MoveForward();
 		break;
-	case kTurnLeft:
+	case OpType::kTurnLeft:
 		map.TurnLeft();
 		break;
-	case kTurnRight:
+	case OpType::kTurnRight:
 		map.TurnRight();
 		break;
 	}

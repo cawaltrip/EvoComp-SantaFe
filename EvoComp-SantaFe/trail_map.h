@@ -90,12 +90,16 @@ public:
 	 *								make in a single evaluation run.
 	 */
 	TrailMap(std::vector<std::string> map_file, size_t step_limit);
+	/** Reset the state of the Ant and Map back to a fresh state */
+	void Reset();
 	/** Explicitly set a cell's contents. Checks bounds. */
 	void SetCell(size_t row, size_t column, TrailData data);
 	/** Retrieve the value at a given point.  Doesn't check bounds. */
 	TrailData GetCell(size_t row, size_t column);
 	/** Return the total number of food on the map. */
 	size_t GetTotalFoodCount();
+	/** Return the number of food the ant has eaten. */
+	size_t GetConsumedFoodCount();
 	/** Return the map as a string.
 	 *
 	 * @param[in]	latex	Add formatting for placing in a LaTeX file.
@@ -115,8 +119,7 @@ public:
 	bool IsFoodAhead();
 	/** Returns whether the ant has any actions left to take */
 	bool HasActionsRemaining();
-	/** Reset the state of the Ant and Map back to a fresh state */
-	void Reset();
+
 
 private:
 	/** 
@@ -148,7 +151,7 @@ private:
 	size_t current_action_count_;
 	size_t action_count_limit_;
 	size_t consumed_food_;
-	size_t uneaten_food_;
+	size_t total_food_;
 	size_t row_count_;
 	size_t column_count_;
 	Ant ant_;

@@ -96,6 +96,8 @@ public:
 	TrailData GetCell(size_t row, size_t column);
 	/** Return the total number of food on the map. */
 	size_t GetTotalFoodCount();
+	/** Return the number of consumed food on the map. */
+	size_t GetConsumedFoodCount();
 	/** Return the map as a string.
 	 *
 	 * @param[in]	latex	Add formatting for placing in a LaTeX file.
@@ -148,7 +150,7 @@ private:
 	size_t current_action_count_;
 	size_t action_count_limit_;
 	size_t consumed_food_;
-	size_t uneaten_food_;
+	size_t total_food_;
 	size_t row_count_;
 	size_t column_count_;
 	Ant ant_;

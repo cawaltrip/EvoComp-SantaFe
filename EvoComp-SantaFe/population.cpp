@@ -28,7 +28,6 @@ Population::Population(size_t population_size, double mutation_rate,
 					   double nonterminal_crossover_rate, 
 					   size_t tournament_size, size_t depth_min, 
 					   size_t depth_max, std::vector<TrailMap> maps) {
-	/** @todo	Triple check everything here is correct! */
 	maps_ = maps;
 	mutation_rate_ = mutation_rate;
 	nonterminal_crossover_rate_ = nonterminal_crossover_rate;
@@ -45,11 +44,6 @@ Population::Population(size_t population_size, double mutation_rate,
 	/* Generate the population */
 	if (depth_min > depth_max) {
 		std::swap(depth_min, depth_max);
-	}
-
-	/** @todo	Is forcing population to be even still necessary? */
-	if (population_size % 2 != 0) {
-		++population_size;
 	}
 	RampedHalfAndHalf(population_size, depth_min, depth_max);
 	CalculateFitness();

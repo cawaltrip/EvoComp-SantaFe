@@ -106,17 +106,6 @@ public:
 	 */
 	std::string BestSolutionToString(bool include_fitness, bool latex);
 	/**
-	 * Returns the `ToString()` function of the individual with the best 
-	 * weighted fitness score.
-	 *
-	 * @param[in]	include_fitness	Include the fitness for each individual.
-	 * @param[in]	latex			Wrap LaTeX code around the output.
-	 *
-	 * @return	The `ToString()` of the individual with the best raw fitness.
-	 */
-	std::string BestWeightedToString(bool include_fitness, bool latex);
-
-	/**
 	 * Returns the number of nodes in the largest tree.
 	 *
 	 * @return	The number of nodes in the largest tree (not the index of the
@@ -161,25 +150,6 @@ public:
 	 * @return	The average raw fitness score.
 	 */
 	double GetAverageFitness();
-	/**
-	 * Returns the best weighted fitness score.
-	 *
-	 * @return	The best weighted fitness score.
-	 */
-	double GetBestWeightedFitness();
-	/**
-	 * Returns the worst weighted fitness score.
-	 *
-	 * @return	The worst weighted fitness score.
-	 */
-	double GetWorstWeightedFitness();
-	/**
-	 * Returns the average weighted fitness score across all individuals in
-	 * the population.
-	 *
-	 * @return	The average weighted fitness score.
-	 */
-	double GetAverageWeightedFitness();
 	/** Get a vector of all of the completed maps for the best solution. */
 	std::vector<std::string> GetBestSolutionMap(bool latex);
 private:
@@ -221,43 +191,10 @@ private:
 	 */
 	size_t SelectIndividual();
 	/** 
-	 * Wrapper that calls the `CalculateRawFitness()` and
-	 * `CalculateWeightedFitness()` functions to make sure that both fitness
-	 * scores are synced.
+	 * Calculate the fitness of an individual based on the genetic program
+	 * represented by the tree of an individual.
 	 */
 	void CalculateFitness();
-	/** 
-	 * Calculates the raw fitness of an individual based only on the
-	 * genetic program represented by the tree of an individual.  This
-	 * function cheats by just calling `CalculateWeightedFitness()`.  This is
-	 * due to the fact, that in order to calculate the weighted fitness the
-	 * raw fitness must first be calculated.  This is also why the 
-	 * `CalculateFitness()` wrapper function exists.  All of these functions
-	 * are private and will never be called outside of the population class.
-	 */
-	void CalculateRawFitness();
-	/** 
-	 * Calculates the weighted fitness of an individual based on the raw
-	 * fitness score and a penalty in the form of a parsimony pressure
-	 * score.  This is used to prevent too much code growth.  The weighted
-	 * fitness is only used by `SelectIndividual()`, otherwise the raw fitness
-	 * score is used.
-	 */
-	void CalculateWeightedFitness();
-	/** 
-	 * The coefficient used to determine the penalty to be attached to the
-	 * raw fitness of an individual to calculate the weighted fitness score.
-	 * This is used to keep code growth down; the size of the genetic programs
-	 * would get out of control way too quickly otherwise and this forces
-	 * mutations to make changes more often - there is less bloat to 
-	 * insulate/protect the valuable parts of the genetic program from being
-	 * modified.
-	 *
-	 * @todo	Use Covariance and Variance to come up with an actual
-	 *			parsimony coefficient instead of returning 1.0f like is
-	 *			currently being done because my statistics skills are lacking.
-	 */
-	double CalculateParsimonyCoefficient();
 	/** 
 	 * Calculates and sets the largest, smallest and average tree size
 	 * variables.
@@ -281,7 +218,7 @@ private:
 	 *
 	 * @todo	This is incredibly inefficient currently!
 	 */
-	void Sort();
+	void Sort(bool reverse_order);
 	std::vector<Individual> pop_;
 	Ant ant;
 	std::vector<TrailMap> maps_;
@@ -295,11 +232,7 @@ private:
 	size_t avg_tree_;
 	size_t total_nodes_;
 	size_t best_index_;
-	size_t best_weighted_index_;
 	double best_fitness_;
 	double worst_fitness_;
 	double avg_fitness_;
-	double best_weighted_fitness_;
-	double worst_weighted_fitness_;
-	double avg_weighted_fitness_;
 };

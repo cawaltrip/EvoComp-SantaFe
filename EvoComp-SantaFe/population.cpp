@@ -53,7 +53,7 @@ Population::Population(size_t population_size, double mutation_rate,
 void Population::Evolve(size_t elitism_count) {
 	std::vector<Individual> evolved_pop(pop_.size());
 	/* Elite individual selection uses raw fitness score. */
-	Sort();
+	Sort(true);
 	for (size_t i = 0; i < elitism_count; ++i) {
 		evolved_pop[i] = pop_[i];
 	}
@@ -95,15 +95,6 @@ std::string Population::BestSolutionToString(bool include_fitness,
 	ss << pop_[best_index_].ToString(latex);
 	return ss.str();
 }
-std::string Population::BestWeightedToString(bool include_fitness,
-											 bool latex) {
-	std::stringstream ss;
-	if (include_fitness) {
-		ss << pop_[best_weighted_index_].GetFitness() << " ==> ";
-	}
-	ss << pop_[best_weighted_index_].ToString(latex);
-	return ss.str();
-}
 size_t Population::GetLargestTreeSize() {
 	return largest_tree_;
 }
@@ -124,15 +115,6 @@ double Population::GetWorstFitness() {
 }
 double Population::GetAverageFitness() {
 	return avg_fitness_;
-}
-double Population::GetBestWeightedFitness() {
-	return best_weighted_fitness_;
-}
-double Population::GetWorstWeightedFitness() {
-	return worst_weighted_fitness_;
-}
-double Population::GetAverageWeightedFitness() {
-	return avg_weighted_fitness_;
 }
 std::vector<std::string> Population::GetBestSolutionMap(bool latex) {
 	return pop_[best_index_].PrintSolvedMap(maps_, latex);
@@ -207,9 +189,6 @@ size_t Population::SelectIndividual() {
 	return winner;
 }
 void Population::CalculateFitness() {
-	CalculateWeightedFitness();
-}
-void Population::CalculateRawFitness() {
 	double cur_fitness = 0;
 	avg_fitness_ = 0;
 	best_fitness_ = DBL_MIN;
@@ -227,42 +206,6 @@ void Population::CalculateRawFitness() {
 		}
 	}
 	avg_fitness_ = avg_fitness_ / pop_.size();
-}
-void Population::CalculateWeightedFitness() {
-	double parsimony_coefficient = CalculateParsimonyCoefficient();
-	double cur_weighted_fitness = 0;
-	avg_weighted_fitness_ = 0;
-	best_weighted_fitness_ = DBL_MIN;
-	worst_weighted_fitness_ = DBL_MAX;
-
-	for (size_t i = 0; i < pop_.size(); ++i) {
-		/* Fake the parsimony pressure for now */
-		if (pop_[i].GetTreeSize() > 100) {
-			parsimony_coefficient = 2;
-		} else {
-			parsimony_coefficient = 0;
-		}
-		pop_[i].CalculateWeightedFitness(parsimony_coefficient);
-		cur_weighted_fitness = pop_[i].GetWeightedFitness();
-		avg_weighted_fitness_ += cur_weighted_fitness;
-		if (cur_weighted_fitness > best_weighted_fitness_) {
-			best_weighted_fitness_ = cur_weighted_fitness;
-			best_weighted_index_ = i;
-		} else if (cur_weighted_fitness < worst_weighted_fitness_) {
-			worst_weighted_fitness_ = cur_weighted_fitness;
-		}
-	}
-	avg_weighted_fitness_ = avg_weighted_fitness_ / pop_.size();
-}
-double Population::CalculateParsimonyCoefficient() {
-	double covariance = 0;
-	double variance = 0;
-
-	CalculateRawFitness();
-	CalculateTreeSize();
-
-	/** @todo	Calculate parsimony pressure correctly. */
-	return 1.0f;
 }
 void Population::CalculateTreeSize() {
 	size_t cur_tree = 0;
@@ -287,15 +230,13 @@ std::mt19937 &Population::GetEngine() {
 	static std::mt19937 mt(rd());
 	return mt;
 }
-void Population::Sort() {
+void Population::Sort(bool reverse_order) {
 	std::sort(pop_.begin(), pop_.end());
-	std::reverse(pop_.begin(), pop_.end());
-	best_index_ = 0;
-	best_weighted_index_ = 0;
-	for (size_t i = 1; i < pop_.size(); ++i) {
-		if (pop_[i].GetWeightedFitness() > 
-			pop_[best_weighted_index_].GetWeightedFitness()) {
-			best_weighted_index_ = i;
-		}
+
+	if (reverse_order) {
+		std::reverse(pop_.begin(), pop_.end());
+		best_index_ = 0;
+	} else {
+		best_index_ = pop_.size() - 1;
 	}
 }

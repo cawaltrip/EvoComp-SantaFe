@@ -26,7 +26,6 @@
  * @file
  * @date 23 November 2015
  *
- * @todo	Determine how and where to store Ant's position data.
  */
 
 #include <fstream>
@@ -112,6 +111,10 @@ int main(int argc, char **argv, char **envp) {
 		if (i % 10 == 0) {
 			std::clog << pop.BestSolutionToString(true, false) << "\n";
 		}
+	}
+	std::vector<std::string> best_solutions = pop.GetBestSolutionMap(false);
+	for (std::string map : best_solutions) {
+		std::clog << map << std::endl;
 	}
 
 	return 0;

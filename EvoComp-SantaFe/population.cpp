@@ -132,6 +132,9 @@ double Population::GetWorstWeightedFitness() {
 double Population::GetAverageWeightedFitness() {
 	return avg_weighted_fitness_;
 }
+std::vector<std::string> Population::GetBestSolutionMap(bool latex) {
+	return pop_[best_index_].PrintSolvedMap(maps_, latex);
+}
 void Population::RampedHalfAndHalf(size_t population_size, size_t depth_min, 
 								   size_t depth_max) {
 	unsigned gradations = static_cast<unsigned>(depth_max - depth_min + 1);

@@ -125,10 +125,25 @@ Node* Individual::GetRootNode() {
 void Individual::SetRootNode(Node *root) {
 	root_ = root;
 }
+std::vector<std::string> Individual::PrintSolvedMap(
+	std::vector<TrailMap> maps, bool latex) {
+	std::vector<std::string> printed_maps;
+	for (TrailMap &map : maps) {
+		RunSimulation(map);
+		printed_maps.emplace_back(map.ToString(latex));
+	}
+	return printed_maps;
+}
 std::mt19937 &Individual::GetEngine() {
 	static std::random_device rd;
 	static std::mt19937 mt(rd());
 	return mt;
+}
+void Individual::RunSimulation(TrailMap &map) {
+	map.Reset();
+	while (map.HasActionsRemaining()) {
+		root_->Evaluate(map);
+	}
 }
 bool Individual::operator==(const Individual &rhs) {
 	return fitness_ == rhs.fitness_;

@@ -33,6 +33,10 @@ void Ant::Reset() {
 	y = 0;
 	direction = Direction::kEast;
 }
+Cell::Cell(TrailData data) : data_(data), original_(data) {}
+void Cell::Reset() {
+	data_ = original_;
+}
 
 TrailMap::TrailMap(std::vector<std::string> map_file, size_t step_limit) : 
 	current_action_count_(0), action_count_limit_(step_limit), 
@@ -47,11 +51,12 @@ TrailMap::TrailMap(std::vector<std::string> map_file, size_t step_limit) :
 	/* Parse the data */
 	map_.resize(row_count_);
 	for (size_t i = 0; i < row_count_; ++i) {
-		map_[i].assign(column_count_, TrailData::kUnvisitedEmpty);
+		map_[i].assign(column_count_, Cell(TrailData::kUnvisitedEmpty));
 		for (size_t j = 0; j < column_count_; ++j) {
-			map_[i][j] = ConvertCharToTrailData(map_file[i][j]);
+			map_[i][j] = Cell(ConvertCharToTrailData(map_file[i][j]));
 		}
 	}
+
 	/* Count the number of food on the map */
 	SetTotalFoodCount();
 }
@@ -61,7 +66,7 @@ void TrailMap::Reset() {
 	/* Reset the Map */
 	for (size_t i = 0; i < row_count_; ++i) {
 		for (size_t j = 0; j < column_count_; ++j) {
-			map_[i][j] = ConvertCellToUnvisited(map_[i][j]);
+			map_[i][j].Reset();
 		}
 	}
 	
@@ -73,12 +78,12 @@ size_t TrailMap::GetTotalFoodCount() {
 }
 void TrailMap::SetCell(size_t row, size_t column, TrailData data) {
 	if (row < row_count_ && column < column_count_) {
-		map_[row][column] = data;
+		map_[row][column].data_ = data;
 	}
 }
 TrailData TrailMap::GetCell(size_t row, size_t column) {
 	/* Simplistic bounds enforcing/checking */
-	return map_[row % row_count_][column % column_count_];
+	return map_[row % row_count_][column % column_count_].data_;
 }
 void TrailMap::MoveForward() {
 	/* Short-circuit execution if the ant is over the action limit. */
@@ -210,9 +215,9 @@ char TrailMap::ConvertTrailDataToChar(TrailData d) {
 void TrailMap::SetTotalFoodCount() {
 	uneaten_food_ = 0;
 	consumed_food_ = 0;
-	for (std::vector<TrailData> row : map_) {
-		for (TrailData d : row) {
-			switch (d) {
+	for (std::vector<Cell> row : map_) {
+		for (Cell d : row) {
+			switch (d.data_) {
 			case TrailData::kUnvisitedFood:
 				++uneaten_food_;
 				break;
@@ -225,22 +230,12 @@ void TrailMap::SetTotalFoodCount() {
 }
 std::string TrailMap::ToString(bool latex) {
 	std::string printed_map;
-	for (std::vector<TrailData> row : map_) {
-		for (TrailData d : row) {
-			printed_map += ConvertTrailDataToChar(d);
+	for (std::vector<Cell> row : map_) {
+		for (Cell d : row) {
+			printed_map += ConvertTrailDataToChar(d.data_);
 		}
 		printed_map += '\n';
 	}
 	printed_map.pop_back();
 	return printed_map;
-}
-TrailData TrailMap::ConvertCellToUnvisited(TrailData d) {
-	switch (d) {
-	case TrailData::kVisitedEmpty:
-		return TrailData::kUnvisitedEmpty;
-	case TrailData::kVisitedFood:
-		return TrailData::kUnvisitedFood;
-	default:
-		return d;
-	}
 }

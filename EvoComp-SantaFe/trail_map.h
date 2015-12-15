@@ -57,17 +57,23 @@ enum class TrailData {
 	kVisitedEmpty,		/**< An empty cell that's been visited. */
 	kVisitedFood		/**< A cell with food that's been eaten. */
 };
+/** 
+ * @struct	Cell
+ * Stores the current and original value of a map coordinate. 
+ */
+struct Cell {
+public:
+	Cell(TrailData data);
+	void Reset();
+	TrailData data_;
+private:
+	TrailData original_;
+};
 /**
  * @class	TrailMap
  * A class that represents a map that an Ant will traverse while collecting
  * food and the total amount of food on the map.  Also responsible for
  * traversing the map and updating the ant's position.
- *
- * @todo	Currently the map can read in a file that has visited cells and in
- *			the Reset() function these will all become unvisited.  If each
- *			cell were to have a field for the original data type, this could
- *			be fixed and resetting wouldn't potentially change the meaning
- *			of the map either.
  */
 class TrailMap {
 public:
@@ -132,23 +138,13 @@ private:
 	 * @return `char` representing the input.
 	 */
 	char ConvertTrailDataToChar(TrailData d);
-	/** 
-	 * Takes in a TrailData item and if it represents a visited cell, it
-	 * returns the unvisited version of that cell type.  This is used to reset
-	 * the map after a run has occurred.
-	 *
-	 * @param[in]	d	`TrailData` to match.
-	 *
-	 * @return	`TrailData` representing unvisited version of the input.
-	 */
-	TrailData ConvertCellToUnvisited(TrailData d);
 	/**
 	* Determine the total number of food in a given map.  This will only need
 	* to be called once at the creation of the `TrailMap` object because the
 	* food count is fixed.
 	*/
 	void SetTotalFoodCount();
-	std::vector<std::vector<TrailData>> map_;
+	std::vector<std::vector<Cell>> map_;
 	size_t current_action_count_;
 	size_t action_count_limit_;
 	size_t consumed_food_;
@@ -156,5 +152,4 @@ private:
 	size_t row_count_;
 	size_t column_count_;
 	Ant ant_;
-
 };

@@ -77,7 +77,7 @@ int main(int argc, char **argv, char **envp) {
 	const size_t kElitismCount = 2;
 
 	/* Map Constants */
-	const size_t kStepLimit = 300;
+	const size_t kStepLimit = 400;
 
 	/* Population Constants */
 	const size_t kPopulationSize = 100;
@@ -93,7 +93,8 @@ int main(int argc, char **argv, char **envp) {
 	std::vector<std::string> files = ParseCommandLine(argc, argv);
 	for (std::string f : files) {
 		TrailMap map(ParseDataFile(f), kStepLimit);
-		std::cout << map.ToString(false) << std::endl << std::endl << std::endl;
+		std::cout << PrintMap(map, false);
+		std::cout << std::endl << std::endl;
 	}
 
 	return 0;

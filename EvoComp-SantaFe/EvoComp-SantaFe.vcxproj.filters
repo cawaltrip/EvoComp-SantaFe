@@ -24,9 +24,6 @@
     <ClInclude Include="trail_map.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ant.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="population.h">
       <Filter>Header Files</Filter>
     </ClInclude>

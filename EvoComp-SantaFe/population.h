@@ -25,7 +25,6 @@
 
 #include <random>
 #include <vector>
-#include "ant.h"
 #include "individual.h"
 #include "trail_map.h"
 
@@ -217,18 +216,6 @@ private:
 	 * help prevent code growth.
 	 */
 	size_t SelectIndividual();
-	/** 
-	 * Returns the indices of the `elite_count` best fit individuals in the
-	 * population to be direct transplants in the population of the next
-	 * generation.
-	 *
-	 * @param[in]	elite_count		The number of individuals to return.
-	 *
-	 * @todo	The `elite_count` variable is entirely ignored and only the
-	 *			two best individuals are returned.  This should be corrected
-	 *			and will involve sorting the entire population first.
-	 */
-	std::vector<size_t> Elitism(size_t elite_count);
 	/** 
 	 * Wrapper that calls the `CalculateRawFitness()` and
 	 * `CalculateWeightedFitness()` functions to make sure that both fitness

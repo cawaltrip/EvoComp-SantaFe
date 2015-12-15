@@ -147,7 +147,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="ant.h" />
     <ClInclude Include="individual.h" />
     <ClInclude Include="node.h" />
     <ClInclude Include="operator_types.h" />

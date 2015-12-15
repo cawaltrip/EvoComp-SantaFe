@@ -19,6 +19,7 @@
  */
 
 #include "population.h"
+#include <algorithm> /* std::sort */
 #include <iostream> /* Logging/error reporting only */
 #include <sstream>
 #include <utility> /* std::swap */
@@ -57,12 +58,12 @@ Population::Population(size_t population_size, double mutation_rate,
 void Population::Evolve(size_t elitism_count) {
 	std::vector<Individual> evolved_pop(pop_.size());
 	/* Elite individual selection uses raw fitness score. */
-	std::vector<size_t> elites = Elitism(elitism_count);
-
+	std::sort(pop_.begin(), pop_.end());
 	for (size_t i = 0; i < elitism_count; ++i) {
-		evolved_pop[i] = pop_[elites[i]];
+		evolved_pop[i] = pop_[i];
 	}
 
+	/* Non-elite individual selection uses weighted fitness score. */
 	for (size_t i = elitism_count; i < evolved_pop.size(); ++i) {
 		size_t p1 = SelectIndividual();
 		size_t p2;
@@ -191,21 +192,6 @@ size_t Population::SelectIndividual() {
 		}
 	}
 	return winner;
-}
-std::vector<size_t> Population::Elitism(size_t elitism_count) {
-	/** @todo	Implement actual elitism. */
-	size_t first, second;
-	first = 0;
-	second = 0;
-
-	for (size_t i = 0; i < pop_.size(); ++i) {
-		if (pop_[i].GetFitness() < pop_[first].GetFitness()) {
-			first = i;
-		} else if (pop_[i].GetFitness() < pop_[second].GetFitness()) {
-			second = i;
-		}
-	}
-	return std::vector<size_t>{first, second};
 }
 void Population::CalculateFitness() {
 	CalculateWeightedFitness();

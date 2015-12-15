@@ -26,7 +26,6 @@
 #include <random>
 #include <utility>
 #include <vector>
-#include "ant.h"
 #include "node.h"
 #include "trail_map.h"
 

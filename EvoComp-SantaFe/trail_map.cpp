@@ -21,11 +21,22 @@
 #include "trail_map.h"
 #include <iostream> /* Logging/error reporting only */
 /* Ant struct */
+/**
+ * @todo	Allow for Ant placement to be defined in map file.
+ * @todo	Rename the TrailMap class and files to Ant or Solution.  All of 
+ * the functions that other users will be calling are from the perspective 
+ * of the Ant anyways.
+ */
 Ant::Ant() : x(0), y(0), direction(Direction::kEast) {}
+void Ant::Reset() {
+	x = 0; 
+	y = 0;
+	direction = Direction::kEast;
+}
 
 TrailMap::TrailMap(std::vector<std::string> map_file, size_t step_limit) : 
-	current_steps_(0), step_limit_(step_limit), row_count_(map_file.size()), 
-	column_count_(0), ant_(Ant()) {
+	current_action_count_(0), action_count_limit_(step_limit), 
+	row_count_(map_file.size()), column_count_(0), ant_(Ant()) {
 
 	for (std::string s : map_file) {
 		if (s.length() > column_count_) {
@@ -44,6 +55,19 @@ TrailMap::TrailMap(std::vector<std::string> map_file, size_t step_limit) :
 	/* Count the number of food on the map */
 	SetTotalFoodCount();
 }
+void TrailMap::Reset() {
+	ant_.Reset();
+
+	/* Reset the Map */
+	for (size_t i = 0; i < row_count_; ++i) {
+		for (size_t j = 0; j < column_count_; ++j) {
+			map_[i][j] = ConvertCellToUnvisited(map_[i][j]);
+		}
+	}
+	
+	/* Reset food count totals */
+	SetTotalFoodCount();
+}
 size_t TrailMap::GetTotalFoodCount() {
 	return uneaten_food_ + consumed_food_;
 }
@@ -53,9 +77,14 @@ void TrailMap::SetCell(size_t row, size_t column, TrailData data) {
 	}
 }
 TrailData TrailMap::GetCell(size_t row, size_t column) {
-	return map_[row][column];
+	/* Simplistic bounds enforcing/checking */
+	return map_[row % row_count_][column % column_count_];
 }
 void TrailMap::MoveForward() {
+	/* Short-circuit execution if the ant is over the action limit. */
+	if (!HasActionsRemaining()) {
+		return;
+	}
 	/* Use modulus to wrap around the map. Easy bounds checking! */
 	switch (ant_.direction) {
 	case Direction::kNorth:
@@ -74,7 +103,7 @@ void TrailMap::MoveForward() {
 		std::cerr << "Ant cannot move in third dimension!" << std::endl;
 		exit(EXIT_FAILURE);
 	}
-	++current_steps_;
+	++current_action_count_;
 	if (GetCell(ant_.x, ant_.y) == TrailData::kUnvisitedFood) {
 		SetCell(ant_.x, ant_.y, TrailData::kVisitedFood);
 		++consumed_food_;
@@ -84,6 +113,10 @@ void TrailMap::MoveForward() {
 	}
 }
 void TrailMap::TurnLeft() {
+	/* Short-circuit execution if the ant is over the action limit. */
+	if (!HasActionsRemaining()) {
+		return;
+	}
 	switch (ant_.direction) {
 	case Direction::kNorth:
 		ant_.direction = Direction::kWest;
@@ -98,9 +131,13 @@ void TrailMap::TurnLeft() {
 		ant_.direction = Direction::kSouth;
 		break;
 	}
-	++current_steps_;
+	++current_action_count_;
 }
 void TrailMap::TurnRight() {
+	/* Short-circuit execution if the ant is over the action limit. */
+	if (!HasActionsRemaining()) {
+		return;
+	}
 	switch (ant_.direction) {
 	case Direction::kNorth:
 		ant_.direction = Direction::kEast;
@@ -115,7 +152,7 @@ void TrailMap::TurnRight() {
 		ant_.direction = Direction::kNorth;
 		break;
 	}
-	++current_steps_;
+	++current_action_count_;
 }
 bool TrailMap::IsFoodAhead() {
 	size_t row = ant_.y;
@@ -139,8 +176,8 @@ bool TrailMap::IsFoodAhead() {
 	}
 	return false;
 }
-bool TrailMap::HasStepsRemaining() {
-	return current_steps_ < step_limit_;
+bool TrailMap::HasActionsRemaining() {
+	return current_action_count_ < action_count_limit_;
 }
 TrailData TrailMap::ConvertCharToTrailData(char c) {
 	switch (c) {
@@ -196,4 +233,14 @@ std::string TrailMap::ToString(bool latex) {
 	}
 	printed_map.pop_back();
 	return printed_map;
+}
+TrailData TrailMap::ConvertCellToUnvisited(TrailData d) {
+	switch (d) {
+	case TrailData::kVisitedEmpty:
+		return TrailData::kUnvisitedEmpty;
+	case TrailData::kVisitedFood:
+		return TrailData::kUnvisitedFood;
+	default:
+		return d;
+	}
 }

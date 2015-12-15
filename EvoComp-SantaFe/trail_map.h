@@ -42,6 +42,7 @@ enum class Direction {
  */
 struct Ant {
 	Ant();	/**< Constructor sets ant's start position and direction. */
+	void Reset(); /**< Reset does the same thing as the constructor */
 	size_t x;	/**< The column number the ant is on. */
 	size_t y;	/**< The row number the ant is on. */
 	Direction direction; /**< The direction the ant is facing. */
@@ -61,6 +62,12 @@ enum class TrailData {
  * A class that represents a map that an Ant will traverse while collecting
  * food and the total amount of food on the map.  Also responsible for
  * traversing the map and updating the ant's position.
+ *
+ * @todo	Currently the map can read in a file that has visited cells and in
+ *			the Reset() function these will all become unvisited.  If each
+ *			cell were to have a field for the original data type, this could
+ *			be fixed and resetting wouldn't potentially change the meaning
+ *			of the map either.
  */
 class TrailMap {
 public:
@@ -98,8 +105,11 @@ public:
 	void TurnRight();
 	/** Returns the status of uneaten food being ahead of the ant */
 	bool IsFoodAhead();
-	/** Returns whether the ant has any steps left to take */
-	bool HasStepsRemaining();
+	/** Returns whether the ant has any actions left to take */
+	bool HasActionsRemaining();
+	/** Reset the state of the Ant and Map back to a fresh state */
+	void Reset();
+
 private:
 	/** 
 	 * Looks up what `TrailData` is represented by a certain character.  If 
@@ -120,6 +130,16 @@ private:
 	 * @return `char` representing the input.
 	 */
 	char ConvertTrailDataToChar(TrailData d);
+	/** 
+	 * Takes in a TrailData item and if it represents a visited cell, it
+	 * returns the unvisited version of that cell type.  This is used to reset
+	 * the map after a run has occurred.
+	 *
+	 * @param[in]	d	`TrailData` to match.
+	 *
+	 * @return	`TrailData` representing unvisited version of the input.
+	 */
+	TrailData ConvertCellToUnvisited(TrailData d);
 	/**
 	* Determine the total number of food in a given map.  This will only need
 	* to be called once at the creation of the `TrailMap` object because the
@@ -127,8 +147,8 @@ private:
 	*/
 	void SetTotalFoodCount();
 	std::vector<std::vector<TrailData>> map_;
-	size_t current_steps_;
-	size_t step_limit_;
+	size_t current_action_count_;
+	size_t action_count_limit_;
 	size_t consumed_food_;
 	size_t uneaten_food_;
 	size_t row_count_;

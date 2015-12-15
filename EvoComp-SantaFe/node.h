@@ -85,10 +85,12 @@ public:
 	void Mutate(double mutation_chance, size_t max_depth);
 	/**
 	 * Evaluate the fitness of a node and its subtree.
-	 * @param[in]	map		A map with food for the Ant to collect.
-	 * @return	Returns the number of food collected.
+	 * @param[in]	&map		A reference to a map that's being evaluated.
+	 *							The Individual and the TrailMap will know to
+	 *							stop execution and the Map will contain the
+	 *							number of food eaten.
 	 */
-	size_t Evaluate(TrailMap map);
+	void Evaluate(TrailMap &map);
 	/**
 	 * Select a node from the tree.  Iteratively searches the tree,
 	 * decrementing the `countdown` number each time only when a node

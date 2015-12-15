@@ -85,7 +85,6 @@ public:
 	/**
 	 * Calculate the fitness of the solution.
 	 *
-	 * @todo	Need to figure out how to incorporate the Ant (if necessary).
 	 */
 	void CalculateFitness(std::vector<TrailMap> maps);
 	/**

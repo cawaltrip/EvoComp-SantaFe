@@ -150,8 +150,33 @@ void Node::Mutate(double mutation_chance, size_t max_depth) {
 		}
 	}
 }
-size_t Node::Evaluate(TrailMap map) {
-	return 1; /** @todo	Implement evaluation function. */
+void Node::Evaluate(TrailMap &map) {
+	switch (op_) {
+	case kProg3:
+		for (size_t i = 0; i < 3; ++i) {
+			children_[i]->Evaluate(map);
+		}
+		break;
+	case kProg2:
+		for (size_t i = 0; i < 2; ++i) {
+			children_[i]->Evaluate(map);
+		}
+		break;
+	case kIfFoodAhead:
+		if (map.IsFoodAhead()) {
+			children_.front()->Evaluate(map);
+		}
+		break;
+	case kMoveForward:
+		map.MoveForward();
+		break;
+	case kTurnLeft:
+		map.TurnLeft();
+		break;
+	case kTurnRight:
+		map.TurnRight();
+		break;
+	}
 }
 std::pair<Node*, size_t> Node::SelectNode(size_t countdown, bool nonterminal) {
 	std::deque<std::pair<Node*, size_t>> stack;

@@ -84,7 +84,16 @@ void Individual::CalculateTreeSize() {
 	root_->CountNodes(terminal_count_, nonterminal_count_);
 }
 void Individual::CalculateFitness(std::vector<TrailMap> maps) {
-	/** @todo	Figure out how to calculate fitness! */
+	fitness_ = 0.0;
+	for (TrailMap &map : maps) {
+		map.Reset();
+		while (map.HasActionsRemaining()) {
+			root_->Evaluate(map);
+		}
+		fitness_ += static_cast<double>(map.GetConsumedFoodCount() /
+										map.GetTotalFoodCount());
+	}
+	fitness_ = fitness_ / maps.size();
 }
 void Individual::CalculateWeightedFitness(double parsimony_coefficiaent) {
 	/** @todo	Once figuring out regular fitness this will be easy. */

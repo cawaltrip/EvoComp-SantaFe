@@ -101,7 +101,7 @@ void Individual::CalculateWeightedFitness(double parsimony_coefficient) {
 	weighted_fitness_ = fitness_;
 }
 void Individual::CorrectTree() {
-	root_->CorrectParents(nullptr);
+	root_->CorrectNodes(nullptr, 0);
 	CalculateTreeSize();
 }
 double Individual::GetFitness() {

@@ -31,16 +31,16 @@ void Node::Copy(Node *to_copy) {
 	children_.clear();
 
 	switch (op_) {
-	case OpType::kProg2:
-		children_.resize(2);
-		for (size_t i = 0; i < 2; ++i) {
+	case OpType::kProg3:
+		children_.resize(3);
+		for (size_t i = 0; i < 3; ++i) {
 			children_[i] = new Node;
 			children_[i]->Copy(to_copy->children_[i]);
 		}
 		break;
-	case OpType::kProg3:
-		children_.resize(3);
-		for (size_t i = 0; i < 3; ++i) {
+	case OpType::kProg2:
+		children_.resize(2);
+		for (size_t i = 0; i < 2; ++i) {
 			children_[i] = new Node;
 			children_[i]->Copy(to_copy->children_[i]);
 		}
@@ -87,10 +87,10 @@ void Node::GenerateTree(size_t cur_depth, size_t max_depth,
 	parent_ = parent;
 
 	if (full_tree) {
-		lower_bound = OpType::kProg2;
+		lower_bound = OpType::kProg3;
 		upper_bound = OpType::kIfFoodAhead;
 	} else {
-		lower_bound = OpType::kProg2;
+		lower_bound = OpType::kProg3;
 		upper_bound = OpType::kTurnRight;
 	}
 	if (cur_depth >= max_depth) {
@@ -261,11 +261,12 @@ bool Node::IsTerminal() {
 	return !IsNonterminal();
 }
 
-void Node::CorrectParents(Node *parent) {
+void Node::CorrectNodes(Node *parent, size_t depth) {
 	this->parent_ = parent;
+	this->depth_ = depth;
 	if (IsNonterminal()) {
 		for (Node *child : children_) {
-			child->CorrectParents(this);
+			child->CorrectNodes(this, depth + 1);
 		}
 	}
 }

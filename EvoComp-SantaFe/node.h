@@ -126,13 +126,15 @@ public:
 	bool IsNonterminal();
 	/** 
 	 * Recursively iterate through the tree and set the parent point of each
-	 * node.  This is useful after the crossover function has completed to
-	 * make sure that the tree can be traversed in both directions and also
-	 * allows trees to leave scope and have their memory freed.
+	 * node and the depth of the node.  This is useful after the crossover 
+	 * function has completed to make sure that the tree can be traversed in 
+	 * both directions and also allows trees to leave scope and have their 
+	 * memory freed.
 	 *
 	 * @param[in]	parent	Pointer to the parent.
+	 * @param[in]	depth	The current depth.
 	 */
-	void CorrectParents(Node *parent);
+	void CorrectNodes(Node *parent, size_t depth);
 
 	/* Accessors/Mutators of Private Data */
 	/** Returns the node's parent. */

@@ -178,7 +178,6 @@ bool TrailMap::IsFoodAhead() {
 		column = (column - 1) % column_count_;
 		break;
 	}
-	++current_action_count_;
 	if (GetCell(row, column) == TrailData::kUnvisitedFood) {
 		return true;
 	}

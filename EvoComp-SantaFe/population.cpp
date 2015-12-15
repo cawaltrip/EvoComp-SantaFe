@@ -34,9 +34,8 @@ Population::Population(size_t population_size, double mutation_rate,
 	nonterminal_crossover_rate_ = nonterminal_crossover_rate;
 	tournament_size_ = tournament_size;
 
-	/** @todo	Default fitness values may need to be swapped. */
-	best_fitness_ = DBL_MAX;
-	worst_fitness_ = DBL_MIN;
+	best_fitness_ = DBL_MIN;
+	worst_fitness_ = DBL_MAX;
 	avg_fitness_ = 0;
 	
 	largest_tree_ = 0;

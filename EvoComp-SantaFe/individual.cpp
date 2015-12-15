@@ -95,7 +95,7 @@ void Individual::CalculateFitness(std::vector<TrailMap> maps) {
 	}
 	fitness_ = fitness_ / maps.size();
 }
-void Individual::CalculateWeightedFitness(double parsimony_coefficiaent) {
+void Individual::CalculateWeightedFitness(double parsimony_coefficient) {
 	/** @todo	Once figuring out regular fitness this will be easy. */
 }
 void Individual::CorrectTree() {

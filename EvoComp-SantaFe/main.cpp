@@ -89,8 +89,14 @@ int main(int argc, char **argv, char **envp) {
 	/* Individual/Node Constants */
 	const size_t kTreeDepthMin = 3;
 	const size_t kTreeDepthMax = 6;
-
 	
+	if (kElitismCount > kPopulationSize) {
+		std::cerr << "Population Size must be larger than Elitism Count.  ";
+		std::cerr << "Adjust these values and recompile the program.";
+		std::cerr << std::endl;
+		exit(EXIT_FAILURE);
+	}
+
 	std::vector<std::string> files = ParseCommandLine(argc, argv);
 	for (std::string f : files) {
 		TrailMap map(ParseDataFile(f), kStepLimit);

@@ -79,8 +79,9 @@ public:
 	 */
 	void CalculateTreeSize();
 	/**
-	 * Calculate the fitness of the solution.
-	 *
+	 * Calculate the fitness of the solution.  Fitness is represented as the
+	 * average percentage of food consumed.  It's defined as:
+	 * ((sum_i^n(foodconsumed_i/totalfood_i))/n)*100
 	 */
 	void CalculateFitness(std::vector<TrailMap> maps);
 	/**

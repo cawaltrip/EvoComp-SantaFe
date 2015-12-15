@@ -119,3 +119,21 @@ std::mt19937 &Individual::GetEngine() {
 	static std::mt19937 mt(rd());
 	return mt;
 }
+bool Individual::operator==(const Individual &rhs) {
+	return fitness_ == rhs.fitness_;
+}
+bool Individual::operator!=(const Individual &rhs) {
+	return !operator==(rhs);
+}
+bool Individual::operator<(const Individual &rhs) {
+	return fitness_ < rhs.fitness_;
+}
+bool Individual::operator<=(const Individual &rhs) {
+	return operator<(rhs) || operator==(rhs);
+}
+bool Individual::operator>(const Individual &rhs) {
+	return !operator<=(rhs);
+}
+bool Individual::operator>=(const Individual &rhs) {
+	return !operator<(rhs);
+}

@@ -118,6 +118,36 @@ public:
 	 * @param[in]	*root	New root node pointer.
 	 */
 	void SetRootNode(Node *root);
+	/**
+	* @function Individual ==
+	* @relates Individual
+	*/
+	bool operator==(const Individual &rhs);
+	/**
+	* @function Individual !=
+	* @relates Individual
+	*/
+	bool operator!=(const Individual &rhs);
+	/**
+	* @function Individual <
+	* @relates Individual
+	*/
+	bool operator<(const Individual &rhs);
+	/**
+	* @function Individual <=
+	* @relates Individual
+	*/
+	bool operator<=(const Individual &rhs);
+	/**
+	* @function Individual >
+	* @relates Individual
+	*/
+	bool operator>(const Individual &rhs);
+	/**
+	* @function Individual >=
+	* @relates Individual
+	*/
+	bool operator>=(const Individual &rhs);
 private:
 	/**
 	 * A static random engine that can be shared throughout the entire class.
@@ -138,3 +168,4 @@ private:
 	size_t terminal_count_;	/**< Number of terminal nodes in the tree. */
 	size_t nonterminal_count_; /**< Number of nonterminal nodes in the tree. */
 };
+

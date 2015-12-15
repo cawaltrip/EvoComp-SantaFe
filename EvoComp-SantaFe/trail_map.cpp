@@ -147,15 +147,13 @@ TrailData TrailMap::ConvertCharToTrailData(char c) {
 	case '_':
 	case '-':
 		return TrailData::kUnvisitedEmpty;
-		break;
 	case 'X':
 	case 'x':
 		return TrailData::kUnvisitedFood;
-		break;
-	case 'A':
-	case 'a':
-		return TrailData::kAntPosition;
-		break;
+	case '+':
+		return TrailData::kVisitedEmpty;
+	case '*':
+		return TrailData::kVisitedFood;
 	}
 	return TrailData::kUnvisitedEmpty;
 }
@@ -169,8 +167,6 @@ char TrailMap::ConvertTrailDataToChar(TrailData d) {
 		return '+';
 	case TrailData::kVisitedFood: 
 		return '*';
-	case TrailData::kAntPosition: 
-		return 'A';
 	}
 	return '?';
 }

@@ -74,14 +74,14 @@ std::string PrintMap(std::vector<std::vector<char>> map, bool latex);
 
 int main(int argc, char **argv, char **envp) {
 	/* Genetic Program Constants */
-	const size_t kEvolutionCount = 1000;
+	const size_t kEvolutionCount = 400;
 	const size_t kElitismCount = 2;
 
 	/* Map Constants */
 	const size_t kStepLimit = 400;
 
 	/* Population Constants */
-	const size_t kPopulationSize = 200;
+	const size_t kPopulationSize = 1000;
 	const double kMutationRate = 0.03;
 	const double kNonterminalCrossoverRate = 0.90;
 	const double kProportionalTournamentRate = 0.70;

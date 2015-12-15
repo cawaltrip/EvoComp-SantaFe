@@ -57,7 +57,7 @@ Population::Population(size_t population_size, double mutation_rate,
 void Population::Evolve(size_t elitism_count) {
 	std::vector<Individual> evolved_pop(pop_.size());
 	/* Elite individual selection uses raw fitness score. */
-	std::sort(pop_.begin(), pop_.end());
+	Sort();
 	for (size_t i = 0; i < elitism_count; ++i) {
 		evolved_pop[i] = pop_[i];
 	}
@@ -272,4 +272,15 @@ std::mt19937 &Population::GetEngine() {
 	static std::random_device rd;
 	static std::mt19937 mt(rd());
 	return mt;
+}
+void Population::Sort() {
+	std::sort(pop_.begin(), pop_.end());
+	best_index_ = 0;
+	best_weighted_index_ = 0;
+	for (size_t i = 1; i < pop_.size(); ++i) {
+		if (pop_[i].GetWeightedFitness() > 
+			pop_[best_weighted_index_].GetWeightedFitness()) {
+			best_weighted_index_ = i;
+		}
+	}
 }

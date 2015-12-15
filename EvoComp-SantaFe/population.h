@@ -271,7 +271,11 @@ private:
 	 * @return	A Mersenne Twister Engine seeded by `std::random_device`.
 	 */
 	std::mt19937 &GetEngine();
-
+	/** 
+	 * Sort the population and make sure the indexes of best and worst
+	 * individuals are updated.
+	 */
+	void Sort();
 	std::vector<Individual> pop_;
 	Ant ant;
 	std::vector<TrailMap> maps_;

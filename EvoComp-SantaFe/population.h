@@ -43,29 +43,31 @@ public:
 	 * defined in the main program.  Also passes the other variables that
 	 * are needed by the `Ant` and `Node` classes to those respective classes.
 	 *
-	 * @param[in]	population_size				Number of individuals in the 
-	 *											population.
-	 * @param[in]	mutation_rate				How often a single node will 
-	 *											mutate.
-	 * @param[in]	nonterminal_crossover_rate	Adjustable variable used with
-	 *											the 90/10 nonterminal/terminal
-	 *											rate.
-	 * @param[in]	tournament_size				The number of individuals 
-	 *											compared when selecting an 
-	 *											individual for crossover.
-	 * @param[in]	depth_min					The lower bound on maximum 
-	 *											tree size.
-	 * @param[in]	depth_max					The upper bound on maximum 
-	 *											tree size.
-	 * @param[in]	maps						Vector of the different map 
-	 *											files that were read in.
-	 *
-	 * @todo	Determine just what variables need to be passed to the
-	 *			different classes.
+	 * @param[in]	population_size					Number of individuals in 
+	 *												the population.
+	 * @param[in]	mutation_rate					How often a single node 
+	 *												will mutate.
+	 * @param[in]	nonterminal_crossover_rate		Adjustable variable used 
+	 *												with the 90/10 
+	 *												nonterminal/terminal rate.
+	 * @param[in]	tournament_size					The number of individuals 
+	 *												compared when selecting an 
+	 *												individual for crossover.
+	 * @param[in]	proportional_tournament_rate	Adjustable variable used to
+	 *												to determine whether
+	 *												selection is based on
+	 *												fitness or parsimony.
+	 * @param[in]	depth_min						The lower bound on maximum 
+	 *												tree size.
+	 * @param[in]	depth_max						The upper bound on maximum 
+	 *												tree size.
+	 * @param[in]	maps							Vector of the different map
+	 *												files that were read in.
 	 */
 	Population(size_t population_size, double mutation_rate, 
 			   double nonterminal_crossover_rate, size_t tournament_size, 
-			   size_t depth_min, size_t depth_max, std::vector<TrailMap> maps);
+			   double proportional_tournament_rate, size_t depth_min, 
+			   size_t depth_max, std::vector<TrailMap> maps);
 	/** 
 	 * The evolve function is the wrapper for the different stages of
 	 * evolution for the genetic program.  Specifically, `Evolve()` selects
@@ -286,6 +288,7 @@ private:
 	double mutation_rate_;
 	double nonterminal_crossover_rate_;
 	size_t tournament_size_;
+	double proportional_tournament_rate_;
 
 	size_t largest_tree_;
 	size_t smallest_tree_;

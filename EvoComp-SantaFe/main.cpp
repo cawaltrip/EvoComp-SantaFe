@@ -84,6 +84,7 @@ int main(int argc, char **argv, char **envp) {
 	const size_t kPopulationSize = 200;
 	const double kMutationRate = 0.03;
 	const double kNonterminalCrossoverRate = 0.90;
+	const double kProportionalTournamentRate = 0.70;
 	const size_t kTournamentSize = 3;
 
 	/* Individual/Node Constants */
@@ -103,7 +104,8 @@ int main(int argc, char **argv, char **envp) {
 		maps.emplace_back(TrailMap(ParseDataFile(f), kStepLimit));
 	}
 	Population pop(kPopulationSize, kMutationRate, kNonterminalCrossoverRate,
-				   kTournamentSize, kTreeDepthMin, kTreeDepthMax, maps);
+				   kTournamentSize, kProportionalTournamentRate,
+				   kTreeDepthMin, kTreeDepthMax, maps);
 
 	for (size_t i = 0; i < kEvolutionCount; ++i) {
 		pop.Evolve(kElitismCount);

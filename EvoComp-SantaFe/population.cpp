@@ -26,12 +26,14 @@
 
 Population::Population(size_t population_size, double mutation_rate,
 					   double nonterminal_crossover_rate, 
-					   size_t tournament_size, size_t depth_min, 
+					   size_t tournament_size, 
+					   double proportional_tournament_rate, size_t depth_min, 
 					   size_t depth_max, std::vector<TrailMap> maps) {
 	maps_ = maps;
 	mutation_rate_ = mutation_rate;
 	nonterminal_crossover_rate_ = nonterminal_crossover_rate;
 	tournament_size_ = tournament_size;
+	proportional_tournament_rate_ = proportional_tournament_rate;
 
 	best_fitness_ = DBL_MIN;
 	worst_fitness_ = DBL_MAX;
@@ -178,17 +180,28 @@ void Population::Crossover(Individual *parent1, Individual *parent2) {
 size_t Population::SelectIndividual() {
 	size_t winner;
 	size_t challenger;
+	bool fitness_based;
 	
+	/* Determine whether tournment is fitness or parsimony based */
+	std::uniform_real_distribution<double> t{ 0,1 };
+	fitness_based = (t(GetEngine()) < proportional_tournament_rate_);
+
+	/* Run the tournament */
 	std::uniform_int_distribution<size_t> d{ 0,pop_.size() - 1 };
 	winner = d(GetEngine());
-	
+
 	for (size_t i = 0; i < tournament_size_; ++i) {
 		do {
 			challenger = d(GetEngine());
 		} while (winner != challenger);
-		if (pop_[challenger].GetWeightedFitness() > 
-			pop_[winner].GetWeightedFitness()) {
-			winner = challenger;
+		if (fitness_based) {
+			if (pop_[challenger] > pop_[winner]) {
+				winner = challenger;
+			}
+		} else {
+			if (pop_[challenger].GetTreeSize() < pop_[winner].GetTreeSize()) {
+				winner = challenger;
+			}
 		}
 	}
 	return winner;

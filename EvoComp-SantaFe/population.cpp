@@ -135,7 +135,6 @@ double Population::GetAverageWeightedFitness() {
 void Population::RampedHalfAndHalf(size_t population_size, size_t depth_min, 
 								   size_t depth_max) {
 	unsigned gradations = static_cast<unsigned>(depth_max - depth_min + 1);
-	pop_.reserve(population_size); /** @todo	Is reserve() needed? */
 	bool full_tree;
 	for (size_t i = 0; i < population_size; ++i) {
 		if (i % 2) {
@@ -162,7 +161,7 @@ void Population::Crossover(Individual *parent1, Individual *parent2) {
 	} else {
 		Node *parent = c1.first->GetParent();
 		c2.first->SetParent(parent);
-		if (parent->GetChild(c1.second)) {
+		if (parent->GetChild(c1.second)) { /* Make sure not a terminal */
 			parent->GetChild(c1.second)->Erase();
 			parent->SetChild(c1.second, c2.first);
 		} else {

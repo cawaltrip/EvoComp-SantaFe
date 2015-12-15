@@ -32,23 +32,13 @@ void Node::Copy(Node *to_copy) {
 
 	switch (op_) {
 	case OpType::kProg3:
-		children_.resize(3);
-		for (size_t i = 0; i < 3; ++i) {
-			children_[i] = new Node;
-			children_[i]->Copy(to_copy->children_[i]);
-		}
-		break;
 	case OpType::kProg2:
-		children_.resize(2);
-		for (size_t i = 0; i < 2; ++i) {
+	case OpType::kIfFoodAhead:
+		children_.resize(to_copy->children_.size());
+		for (size_t i = 0; i < to_copy->children_.size(); ++i) {
 			children_[i] = new Node;
 			children_[i]->Copy(to_copy->children_[i]);
 		}
-		break;
-	case OpType::kIfFoodAhead:
-		children_.resize(1);
-		children_[0] = new Node;
-		children_[0]->Copy(to_copy->children_[0]);
 		break;
 	}
 }
@@ -106,9 +96,8 @@ void Node::GenerateTree(size_t cur_depth, size_t max_depth,
 	case OpType::kProg3:
 		++children_counter;
 	case OpType::kProg2:
-		++children_counter;
 	case OpType::kIfFoodAhead:
-		++children_counter;
+		children_counter += 2;
 		children_.resize(children_counter);
 		for (size_t i = 0; i < children_counter; ++i) {
 			Node *child = new Node;
@@ -148,9 +137,8 @@ void Node::Mutate(double mutation_chance, size_t max_depth) {
 		case OpType::kProg3:
 			++children_counter;
 		case OpType::kProg2:
-			++children_counter;
 		case OpType::kIfFoodAhead:
-			++children_counter;
+			children_counter += 2;
 			for (size_t i = 0; i < children_counter; ++i) {
 				Node *child = new Node;
 				children_[i] = child;
@@ -169,6 +157,7 @@ void Node::Mutate(double mutation_chance, size_t max_depth) {
 	}
 }
 void Node::Evaluate(TrailMap &map) {
+	/** @todo	Combone kProg3 and kProg2 and iterate over size of children */
 	switch (op_) {
 	case OpType::kProg3:
 		for (size_t i = 0; i < 3; ++i) {
@@ -182,7 +171,9 @@ void Node::Evaluate(TrailMap &map) {
 		break;
 	case OpType::kIfFoodAhead:
 		if (map.IsFoodAhead()) {
-			children_.front()->Evaluate(map);
+			children_[0]->Evaluate(map);
+		} else {
+			children_[1]->Evaluate(map);
 		}
 		break;
 	case OpType::kMoveForward:

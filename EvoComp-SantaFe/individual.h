@@ -85,7 +85,7 @@ public:
 	 */
 	void CalculateFitness(std::vector<TrailMap> maps);
 	/**
-	 * Corrent the `parent_` variable pointers for the entire tree.  This is
+	 * Correct the `parent_` variable pointers for the entire tree.  This is
 	 * necessary after copying the tree during the crossover operation.
 	 */
 	void CorrectTree();

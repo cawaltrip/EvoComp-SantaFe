@@ -51,6 +51,7 @@ void Node::Erase() {
 	delete this;
 }
 std::string Node::ToString(bool latex) {
+	/** @todo	Come up with a better representation of the solution. */
 	switch (op_) {
 	case OpType::kProg3:
 		return("(" + children_[0]->ToString(latex) + ") " +

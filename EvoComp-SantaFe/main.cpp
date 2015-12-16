@@ -33,8 +33,9 @@
 #include <string>
 #include <vector>
 #include <boost/program_options.hpp>
-#include "trail_map.h"
+#include "options.h"
 #include "population.h"
+#include "trail_map.h"
 namespace po = boost::program_options;
 
 /**
@@ -43,15 +44,13 @@ namespace po = boost::program_options;
  * an invalid filename.
  * @param[in]	argc	Number of items in argv.
  * @param[in]	argv	List of command line arguments.
- * @return	Returns the filenames as a `std::vector<std::string>`.
- * @todo	Allow for some maps to be withheld as a final test (after 
- *			evolution is complete) to test the bias of the genetic program 
- *			towards a specialized solution versus a generalized solution.
+ * @param[out]	opts	Command line options that were specified.
  */
- std::vector<std::string> ParseCommandLine(int argc, char **argv);
+ void ParseCommandLine(int argc, char **argv, Options &opt);
  /**
   * Returns the utility usage syntax.
   * @param[in]	program_name	Name of the exectued program (i.e, argv[0]).
+  *
   * @return	Returns a `std::string` of usage details with the name of the 
   *			calling program inserted into the string.
   */
@@ -64,87 +63,144 @@ namespace po = boost::program_options;
   *			contents of the file read in.
   */
 std::vector<std::string> ParseDataFile(std::string filename);
-/** 
- * Returns string representation of map.
- * @param[in]	map		Map to print.
- * @param[in]	latex	Add LaTeX wrappings or not.
- * @return	Returns a `std::string` containing contents of the map.
- */
-std::string PrintMap(std::vector<std::vector<char>> map, bool latex);
+
+static Options opts;
 
 int main(int argc, char **argv, char **envp) {
-	/* Genetic Program Constants */
-	const size_t kEvolutionCount = 400;
-	const size_t kElitismCount = 2;
+	ParseCommandLine(argc, argv, opts);
 
-	/* Map Constants */
-	const size_t kStepLimit = 400;
-
-	/* Population Constants */
-	const size_t kPopulationSize = 1000;
-	const double kMutationRate = 0.03;
-	const double kNonterminalCrossoverRate = 0.90;
-	const double kProportionalTournamentRate = 0.70;
-	const size_t kTournamentSize = 3;
-
-	/* Individual/Node Constants */
-	const size_t kTreeDepthMin = 3;
-	const size_t kTreeDepthMax = 6;
-	
-	if (kElitismCount > kPopulationSize) {
-		std::cerr << "Population Size must be larger than Elitism Count.  ";
-		std::cerr << "Adjust these values and recompile the program.";
-		std::cerr << std::endl;
-		exit(EXIT_FAILURE);
-	}
-
-	std::vector<std::string> files = ParseCommandLine(argc, argv);
 	std::vector<TrailMap> maps;
-	for (std::string f : files) {
-		maps.emplace_back(TrailMap(ParseDataFile(f), kStepLimit));
-	}
-	Population pop(kPopulationSize, kMutationRate, kNonterminalCrossoverRate,
-				   kTournamentSize, kProportionalTournamentRate,
-				   kTreeDepthMin, kTreeDepthMax, maps);
+	std::vector<TrailMap> primary_map;
+	std::vector<TrailMap> verification_maps;
+	std::vector<Population> populations;
 
-	for (size_t i = 0; i < kEvolutionCount; ++i) {
-		pop.Evolve(kElitismCount);
-		if (i % 50 == 0) {
-			std::clog << pop.BestSolutionToString(true, false) << "\n";
+	/* Create all the maps */
+	for (std::string f : opts.map_test_suite_files_) {
+		maps.emplace_back(TrailMap(ParseDataFile(f), 
+								   opts.action_count_limit_));
+	}
+	if (opts.primary_map_exists_) {
+		primary_map.emplace_back(TrailMap(
+			ParseDataFile(opts.primary_map_file_), opts.action_count_limit_));
+	}
+	if (opts.verification_maps_exist_) {
+		for (std::string f : opts.verification_map_files_) {
+			verification_maps.emplace_back(TrailMap(ParseDataFile(f),
+													opts.action_count_limit_));
 		}
 	}
-	std::vector<std::string> best_solutions = pop.GetBestSolutionMap(false);
-	for (std::string map : best_solutions) {
-		std::clog << map << "\n\n";
+
+	/* Create the populations */
+	populations.emplace_back(Population(opts, maps));
+	if (opts.primary_map_exists_) {
+		populations.emplace_back(Population(populations.front(), primary_map));
+	}
+
+	/* Evolve the populations in tandem */
+	for (size_t i = 0; i < opts.evolution_count_; ++i) {
+		for (auto p : populations) {
+			p.Evolve(opts.elitism_count_);
+			if (i % 100 == 0) {
+				std::clog << i << ": " << p.GetBestFitness();
+				std::clog << "(" << p.GetWorstFitness() << ")\n";
+				std::clog << p.BestSolutionToString(true, false) << "\n";
+			}
+			/** @todo	Do file IO that's need here. */
+		}
+	}
+
+	/*
+	 * Evolution is done.  Write last of results to file.  If a verification 
+	 * map set exists, then run all the populations through the maps.
+	 */
+	if (opts.verification_maps_exist_) {
+		for (auto p : populations) {
+			p.SetMaps(verification_maps);
+		}
+		for (auto p : populations) {
+			p.CalculateFitness();
+			std::clog << "Verification: " << p.GetBestFitness() << "\n";
+			/** @todo	Do new necessary file IO here. */
+		}
 	}
 
 	return 0;
 }
-std::vector<std::string> ParseCommandLine(int argc, char **argv) {
+void ParseCommandLine(int argc, char **argv, Options &opts) {
 	/* Vector to hold return values */
 	std::vector<std::string> filenames;
 
-	/* Parse Command Line arguments and return filename string */
-	po::options_description opts("Options");
-	opts.add_options()
-		("help,h", "print this help and exit")
-		("verbose,v", "print extra logging information")
-		("input,i", po::value<std::vector<std::string>>(),
-		 "specify input file(s)");
+	po::options_description basic_opts("Basic Options");
+	po::options_description pop_opts("Population Options");
+	po::options_description indiv_opts("Individual Options");
+	po::options_description input_opts("Input File Options");
+	po::options_description cmd_opts;
 	po::positional_options_description positional_opts;
+	po::variables_map vm;
+
+	/* Basic Options */
+	basic_opts.add_options()
+		("help,h", "print this help and exit")
+		("verbose,v", "print extra logging information");
+	pop_opts.add_options()
+		("generations,g",
+		 po::value<size_t>(&opts.evolution_count_)->default_value(500),
+		 "Number of generations to evolve.")
+		("elitism,e",
+		 po::value<size_t>(&opts.elitism_count_)->default_value(2),
+		 "Number of elite individuals to keep between generations.")
+		("population-size,p",
+		 po::value<size_t>(&opts.population_size_)->default_value(100),
+		 "Number of individuals in a population.")
+		("action-limit,a",
+		 po::value<size_t>(&opts.action_count_limit_)->default_value(400),
+		 "Maximum number of actions to evaluate.")
+		("tournament-size,t",
+		 po::value<size_t>(&opts.tournament_size_)->default_value(3),
+		 "Number of Individuals in a tournament.")
+		("proportional-tournament-rate,r",
+		 po::value<double>(&opts.proportional_tournament_rate_)
+		 ->default_value(1.00),
+		 "Rate that tournament is fitness based instead of parsimony based.");
+	indiv_opts.add_options()
+		("mutation,m", 
+		 po::value<double>(&opts.mutation_rate_)->default_value(0.03),
+		 "Rate of mutation per node in the tree.")
+		("nonterminal-crossover-rate,n",
+		 po::value<double>(&opts.nonterminal_crossover_rate_)
+		 ->default_value(0.90),
+		 "Rate that nonterminals are chosen as crossover point.")
+		("min-depth,d", 
+		 po::value<size_t>(&opts.tree_depth_min_)->default_value(3),
+		 "Minimum tree depth.")
+		("max-depth,x", 
+		 po::value<size_t>(&opts.tree_depth_max_)->default_value(6),
+		 "Maximum tree depth.");
+	input_opts.add_options()
+		("input,I",
+		 po::value<std::vector<std::string>>(&opts.map_test_suite_files_)
+		 ->required(),
+		 "Specify input file(s)")
+		("primary,P", po::value<std::string>(&opts.primary_map_file_),
+		 "Primary map file to use if comparing one map to multiple.")
+		("verification,V",
+		 po::value<std::vector<std::string>>(&opts.verification_map_files_),
+		 "Map list to use as verification if comparing one map to multiple.");
 	positional_opts.add("input", -1);
 
-	po::variables_map vm;
-	po::store(po::command_line_parser(argc, argv).options(opts)
+	cmd_opts.add(basic_opts).add(pop_opts).add(indiv_opts).add(input_opts);
+
+	po::store(po::command_line_parser(argc, argv).options(cmd_opts)
 			  .positional(positional_opts).run(), vm);
-	po::notify(vm);
 
 	if (vm.count("help")) {
 		std::cout << GetUsageString(std::string(argv[0])) << std::endl;
-		std::cout << opts << std::endl;
+		std::cout << cmd_opts << std::endl;
 		exit(EXIT_SUCCESS);
 	}
 
+	po::notify(vm);
+	
 	if (!vm.count("verbose")) {
 		std::clog.rdbuf(nullptr);
 	}
@@ -160,10 +216,38 @@ std::vector<std::string> ParseCommandLine(int argc, char **argv) {
 	} else {
 		std::cerr << "Please specify input files" << std::endl;
 		std::cerr << GetUsageString(std::string(argv[0])) << std::endl;
-		std::cerr << opts << std::endl;
+		std::cerr << cmd_opts << std::endl;
 		exit(EXIT_FAILURE);
 	}
-	return filenames;
+
+	if (vm.count("primary")) {
+		if (!(std::ifstream(opts.primary_map_file_).good())) {
+			std::cerr << opts.primary_map_file_ << " not found!" << std::endl;
+			exit(EXIT_FAILURE);
+		}
+		opts.primary_map_exists_ = true;
+	} else {
+		opts.primary_map_exists_ = false;
+	}
+
+	if (vm.count("verification")) {
+		for (auto fn : opts.verification_map_files_) {
+			if (!(std::ifstream(fn).good())) {
+				std::cerr << fn << " not found!" << std::endl;
+				exit(EXIT_FAILURE);
+			}
+		}
+		opts.verification_maps_exist_ = true;
+	} else {
+		opts.verification_maps_exist_ = false;
+	}
+
+	if (opts.elitism_count_ > opts.population_size_) {
+		std::cerr << "Population Size must be larger than Elitism Count.  ";
+		std::cerr << "Adjust these values and recompile the program.";
+		std::cerr << std::endl;
+		exit(EXIT_FAILURE);
+	}
 }
 std::string GetUsageString(std::string program_name) {
 	size_t found = program_name.find_last_of("/\\");

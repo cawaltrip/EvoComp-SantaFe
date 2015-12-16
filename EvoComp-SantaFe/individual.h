@@ -85,19 +85,12 @@ public:
 	 */
 	void CalculateFitness(std::vector<TrailMap> maps);
 	/**
-	 * Given the raw fitness of the Individual, calculate the weighted fitness
-	 * by applying a penalty based on the parsimony coefficient passed in.
-	 */
-	void CalculateWeightedFitness(double parsimony_coefficient);
-	/**
 	 * Corrent the `parent_` variable pointers for the entire tree.  This is
 	 * necessary after copying the tree during the crossover operation.
 	 */
 	void CorrectTree();
 	/** Return the fitness of the Individual */
 	double GetFitness();
-	/** Return the weighted fitness of the Individual */
-	double GetWeightedFitness();
 	/** Return the size of the tree of the Individual */
 	size_t GetTreeSize();
 	/** Return the number of terminal nodes in the tree. */
@@ -148,7 +141,6 @@ private:
 	Node *root_; /**< Root node of the solution tree. */
 	size_t original_max_depth_; /**< The original maximum size of the tree. */
 	double fitness_; /**< Raw fitness score. */
-	double weighted_fitness_; /**< Fitness score with parsimony penalty. */
 	size_t terminal_count_;	/**< Number of terminal nodes in the tree. */
 	size_t nonterminal_count_; /**< Number of nonterminal nodes in the tree. */
 };

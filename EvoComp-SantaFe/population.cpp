@@ -50,6 +50,33 @@ Population::Population(size_t population_size, double mutation_rate,
 	RampedHalfAndHalf(population_size, depth_min, depth_max);
 	CalculateFitness();
 }
+Population::Population(Options opts, std::vector<TrailMap> maps) : 
+	Population(opts.population_size_, opts.mutation_rate_, 
+			   opts.nonterminal_crossover_rate_, opts.tournament_size_, 
+			   opts.proportional_tournament_rate_, opts.tree_depth_min_, 
+			   opts.tree_depth_max_, maps) {}
+Population::Population(const Population &copy, 
+					   std::vector<TrailMap> new_maps) {
+	maps_ = new_maps;
+	mutation_rate_ = copy.mutation_rate_;
+	nonterminal_crossover_rate_ = copy.nonterminal_crossover_rate_;
+	tournament_size_ = copy.tournament_size_;
+	proportional_tournament_rate_ = copy.proportional_tournament_rate_;
+
+	best_fitness_ = copy.best_fitness_;
+	worst_fitness_ = copy.worst_fitness_;
+	avg_fitness_ = copy.avg_fitness_;
+
+	largest_tree_ = copy.largest_tree_;
+	smallest_tree_ = copy.smallest_tree_;
+	avg_tree_ = copy.avg_tree_;
+
+	pop_.resize(copy.pop_.size());
+	for (size_t i = 0; i < copy.pop_.size(); ++i) {
+		Individual new_individual(copy.pop_[i]);
+		pop_[i] = new_individual;
+	}
+}
 void Population::Evolve(size_t elitism_count) {
 	std::vector<Individual> evolved_pop(pop_.size());
 	/* Elite individual selection uses raw fitness score. */
@@ -75,6 +102,46 @@ void Population::Evolve(size_t elitism_count) {
 	}
 	this->pop_ = evolved_pop;
 	CalculateFitness();
+}
+void Population::CalculateFitness() {
+	double cur_fitness = 0;
+	avg_fitness_ = 0;
+	best_fitness_ = DBL_MIN;
+	worst_fitness_ = DBL_MAX;
+
+	for (size_t i = 0; i < pop_.size(); ++i) {
+		pop_[i].CalculateFitness(maps_);
+		cur_fitness = pop_[i].GetFitness();
+		avg_fitness_ += cur_fitness;
+		if (cur_fitness > best_fitness_) {
+			best_fitness_ = cur_fitness;
+			best_index_ = i;
+		} else if (cur_fitness < worst_fitness_) {
+			worst_fitness_ = cur_fitness;
+		}
+	}
+	avg_fitness_ = avg_fitness_ / pop_.size();
+}
+void Population::CalculateTreeSize() {
+	size_t cur_tree = 0;
+	avg_tree_ = 0;
+	largest_tree_ = -1;
+	smallest_tree_ = SIZE_MAX;
+
+	for (auto p : pop_) {
+		cur_tree = p.GetTreeSize();
+		avg_tree_ += cur_tree;
+		if (cur_tree > largest_tree_) {
+			largest_tree_ = cur_tree;
+		} else if (cur_tree < smallest_tree_) {
+			smallest_tree_ = cur_tree;
+		}
+	}
+	total_nodes_ = avg_tree_;
+	avg_tree_ = avg_tree_ / pop_.size();
+}
+void Population::SetMaps(std::vector<TrailMap> maps) {
+	maps_ = maps;
 }
 std::string Population::ToString(bool include_fitness, bool latex) {
 	std::stringstream ss;
@@ -188,43 +255,6 @@ size_t Population::SelectIndividual() {
 	}
 	return winner;
 }
-void Population::CalculateFitness() {
-	double cur_fitness = 0;
-	avg_fitness_ = 0;
-	best_fitness_ = DBL_MIN;
-	worst_fitness_ = DBL_MAX;
-
-	for (size_t i = 0; i < pop_.size(); ++i) {
-		pop_[i].CalculateFitness(maps_);
-		cur_fitness = pop_[i].GetFitness();
-		avg_fitness_ += cur_fitness;
-		if (cur_fitness > best_fitness_) {
-			best_fitness_ = cur_fitness;
-			best_index_ = i;
-		} else if (cur_fitness < worst_fitness_) {
-			worst_fitness_ = cur_fitness;
-		}
-	}
-	avg_fitness_ = avg_fitness_ / pop_.size();
-}
-void Population::CalculateTreeSize() {
-	size_t cur_tree = 0;
-	avg_tree_ = 0;
-	largest_tree_ = -1;
-	smallest_tree_ = SIZE_MAX;
-
-	for (auto p : pop_) {
-		cur_tree = p.GetTreeSize();
-		avg_tree_ += cur_tree;
-		if (cur_tree > largest_tree_) {
-			largest_tree_ = cur_tree;
-		} else if (cur_tree < smallest_tree_) {
-			smallest_tree_ = cur_tree;
-		}
-	}
-	total_nodes_ = avg_tree_;
-	avg_tree_ = avg_tree_ / pop_.size();
-}
 std::mt19937 &Population::GetEngine() {
 	static std::random_device rd;
 	static std::mt19937 mt(rd());
@@ -232,7 +262,6 @@ std::mt19937 &Population::GetEngine() {
 }
 void Population::Sort(bool reverse_order) {
 	std::sort(pop_.begin(), pop_.end());
-
 	if (reverse_order) {
 		std::reverse(pop_.begin(), pop_.end());
 		best_index_ = 0;

@@ -26,6 +26,7 @@
 #include <random>
 #include <vector>
 #include "individual.h"
+#include "options.h"
 #include "trail_map.h"
 
 /**
@@ -68,6 +69,8 @@ public:
 			   double nonterminal_crossover_rate, size_t tournament_size, 
 			   double proportional_tournament_rate, size_t depth_min, 
 			   size_t depth_max, std::vector<TrailMap> maps);
+	Population(Options opts, std::vector<TrailMap> maps);
+	Population(const Population &copy, std::vector<TrailMap> new_maps);
 	/** 
 	 * The evolve function is the wrapper for the different stages of
 	 * evolution for the genetic program.  Specifically, `Evolve()` selects
@@ -86,6 +89,21 @@ public:
 	 *			population.
 	 */
 	void Evolve(size_t elitism_count = 2);
+	/**
+	 * Calculate the fitness of an individual based on the genetic program
+	 * represented by the tree of an individual.
+	 */
+	void CalculateFitness();
+	/**
+	 * Calculates and sets the largest, smallest and average tree size
+	 * variables.
+	 */
+	void CalculateTreeSize();
+	/** 
+	 * Sets the maps that the Individuals in the population will calculuate
+	 * their fitness based on.
+	 */
+	void SetMaps(std::vector<TrailMap> maps);
 	/** 
 	 * Returns the `ToString()` function of every individual in the population.
 	 * 
@@ -190,16 +208,6 @@ private:
 	 * help prevent code growth.
 	 */
 	size_t SelectIndividual();
-	/** 
-	 * Calculate the fitness of an individual based on the genetic program
-	 * represented by the tree of an individual.
-	 */
-	void CalculateFitness();
-	/** 
-	 * Calculates and sets the largest, smallest and average tree size
-	 * variables.
-	 */
-	void CalculateTreeSize();
 	/**
 	 * A static random engine that can be shared throughout the entire class.
 	 * Based on the idea found in:
@@ -220,7 +228,6 @@ private:
 	 */
 	void Sort(bool reverse_order);
 	std::vector<Individual> pop_;
-	Ant ant;
 	std::vector<TrailMap> maps_;
 	double mutation_rate_;
 	double nonterminal_crossover_rate_;

@@ -153,6 +153,7 @@
     <ClInclude Include="individual.h" />
     <ClInclude Include="node.h" />
     <ClInclude Include="operator_types.h" />
+    <ClInclude Include="options.h" />
     <ClInclude Include="population.h" />
     <ClInclude Include="trail_map.h" />
   </ItemGroup>

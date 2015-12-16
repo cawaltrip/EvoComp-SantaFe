@@ -29,7 +29,6 @@ Individual::Individual() {
 	terminal_count_ = 0;
 	nonterminal_count_ = 0;
 	fitness_ = 0;
-	weighted_fitness_ = 0;
 }
 Individual::Individual(size_t depth_max, bool full_tree) : Individual() {
 	original_max_depth_ = depth_max;
@@ -42,8 +41,6 @@ Individual::Individual(const Individual &to_copy) {
 	terminal_count_ = to_copy.terminal_count_;
 	nonterminal_count_ = to_copy.nonterminal_count_;
 	fitness_ = to_copy.fitness_;
-	weighted_fitness_ = to_copy.weighted_fitness_;
-
 	CorrectTree();
 }
 void Individual::Erase() {
@@ -90,14 +87,10 @@ void Individual::CalculateFitness(std::vector<TrailMap> maps) {
 		while (map.HasActionsRemaining()) {
 			root_->Evaluate(map);
 		}
-		fitness_ += static_cast<double>(map.GetConsumedFoodCount() / 
-										map.GetTotalFoodCount());
+		fitness_ += 100 * (static_cast<double>(map.GetConsumedFoodCount() / 
+										map.GetTotalFoodCount()));
 	}
-	fitness_ = (fitness_ / maps.size()) * 100;
-}
-void Individual::CalculateWeightedFitness(double parsimony_coefficient) {
-	/** @todo	Once figuring out regular fitness this will be easy. */
-	weighted_fitness_ = fitness_;
+	fitness_ = (fitness_ / maps.size());
 }
 void Individual::CorrectTree() {
 	root_->CorrectNodes(nullptr, 0);
@@ -105,9 +98,6 @@ void Individual::CorrectTree() {
 }
 double Individual::GetFitness() {
 	return fitness_;
-}
-double Individual::GetWeightedFitness() {
-	return weighted_fitness_;
 }
 size_t Individual::GetTreeSize() {
 	return GetTerminalCount() + GetNonterminalCount();

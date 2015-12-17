@@ -163,13 +163,9 @@ void Node::Evaluate(TrailMap &map) {
 	/** @todo	Combone kProg3 and kProg2 and iterate over size of children */
 	switch (op_) {
 	case OpType::kProg3:
-		for (size_t i = 0; i < 3; ++i) {
-			children_[i]->Evaluate(map);
-		}
-		break;
 	case OpType::kProg2:
-		for (size_t i = 0; i < 2; ++i) {
-			children_[i]->Evaluate(map);
+		for (Node *child : children_) {
+			child->Evaluate(map);
 		}
 		break;
 	case OpType::kIfFoodAhead:

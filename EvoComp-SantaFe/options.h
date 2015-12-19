@@ -30,7 +30,7 @@
  * the option parser and the main function for organization and cleanliness.
  */
 struct Options {
-	size_t evolution_count_ = 500;
+	size_t evolution_count_ = 100;
 	size_t elitism_count_ = 2;
 	size_t population_size_ = 100;
 	size_t action_count_limit_ = 400;
@@ -39,7 +39,7 @@ struct Options {
 	double proportional_tournament_rate_ = 2.0; /* Between 0 and 1 */
 	size_t tournament_size_ = 3;
 	size_t tree_depth_min_ = 3;
-	size_t tree_depth_max_ = 6;
+	size_t tree_depth_max_ = 8;
 	std::vector<std::string> map_files_;
 	std::vector<std::string> secondary_map_files_;
 	std::vector<std::string> verification_map_files_;

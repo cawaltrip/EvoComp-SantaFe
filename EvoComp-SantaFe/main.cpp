@@ -72,7 +72,7 @@ int main(int argc, char **argv, char **envp) {
 	std::vector<TrailMap> maps;
 	std::vector<TrailMap> secondary_maps;
 	std::vector<TrailMap> verification_maps;
-	std::vector<Population> populations;
+	std::vector<Population*> populations;
 
 	/* Create all the maps */
 	for (std::string fn : opts.map_files_) {
@@ -93,20 +93,20 @@ int main(int argc, char **argv, char **envp) {
 	}
 
 	/* Create the populations */
-	populations.emplace_back(Population(opts, maps));
+	populations.emplace_back(new Population(opts, maps));
 	if (opts.secondary_maps_exist_) {
-		populations.emplace_back(Population(populations.front(), 
-											secondary_maps));
+		populations.emplace_back(new Population(*populations.front(),
+												secondary_maps));
 	}
 
 	/* Evolve the populations in tandem */
 	for (size_t i = 0; i < opts.evolution_count_; ++i) {
 		for (auto p : populations) {
-			p.Evolve(opts.elitism_count_);
-			if (i % 100 == 0) {
-				std::clog << i << ": " << p.GetBestFitness();
-				std::clog << "(" << p.GetWorstFitness() << ")\n";
-				std::clog << p.BestSolutionToString(true, false) << "\n";
+			p->Evolve(opts.elitism_count_);
+			if (i % 25 == 0) {
+				std::clog << i << ": " << p->GetBestFitness();
+				std::clog << "(" << p->GetWorstFitness() << ")\n";
+				std::clog << p->BestSolutionToString(true, false) << "\n";
 			}
 			/** @todo	Do file IO that's need here. */
 		}
@@ -118,11 +118,11 @@ int main(int argc, char **argv, char **envp) {
 	 */
 	if (opts.verification_maps_exist_) {
 		for (auto p : populations) {
-			p.SetMaps(verification_maps);
+			p->SetMaps(verification_maps);
 		}
 		for (auto p : populations) {
-			p.CalculateFitness();
-			std::clog << "Verification: " << p.GetBestFitness() << "\n";
+			p->CalculateFitness();
+			std::clog << "Verification: " << p->GetBestFitness() << "\n";
 			/** @todo	Do new necessary file IO here. */
 		}
 	}

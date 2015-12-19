@@ -79,11 +79,14 @@ public:
 	 */
 	void CalculateTreeSize();
 	/**
-	 * Calculate the fitness of the solution.  Fitness is represented as the
-	 * average percentage of food consumed.  It's defined as:
-	 * ((sum_i^n(foodconsumed_i/totalfood_i))/n)*100
+	 * Calculate the scores of the individual based on the maps given.
 	 */
-	void CalculateFitness(std::vector<TrailMap> maps);
+	void CalculateScores(std::vector<TrailMap> maps);
+	/**
+	 * Calculate the fitness of the individual based on the scores that were
+	 * set previously.
+	 */
+	void CalculateFitness();
 	/**
 	 * Correct the `parent_` variable pointers for the entire tree.  This is
 	 * necessary after copying the tree during the crossover operation.
@@ -111,18 +114,6 @@ public:
 	 */
 	std::vector<std::string> PrintSolvedMap(std::vector<TrailMap> maps,
 											bool latex);
-	/** Compare whether two individuals are the same using raw fitness */
-	bool operator==(const Individual &rhs);
-	/** Compare whether two individuals aren't the same using raw fitness */
-	bool operator!=(const Individual &rhs);
-	/** Compare the left individual to the right using their raw fitnesses */
-	bool operator<(const Individual &rhs);
-	/** Compare the left individual to the right using their raw fitnesses */
-	bool operator<=(const Individual &rhs);
-	/** Compare the left individual to the right using their raw fitnesses */
-	bool operator>(const Individual &rhs);
-	/** Compare the left individual to the right using their raw fitnesses */
-	bool operator>=(const Individual &rhs);
 private:
 	/**
 	 * A static random engine that can be shared throughout the entire class.
@@ -136,12 +127,17 @@ private:
 	 * @return	A Mersenne Twister Engine seeded by `std::random_device`.
 	 */
 	std::mt19937 &GetEngine();
-	/** Run the genetic program on a single map and don't modify fitness */
+	/** Run the genetic program on a list of maps */
+	void RunSimulation(std::vector<TrailMap> maps);
+	/** Run the genetic program on a single map */
 	void RunSimulation(TrailMap &map);
+	
 	Node *root_; /**< Root node of the solution tree. */
-	size_t original_max_depth_; /**< The original maximum size of the tree. */
-	double fitness_; /**< Raw fitness score. */
+	std::vector<std::pair<size_t, size_t>> scores_; /**< Raw food counts. */
+	double fitness_; /**< Fitness score. */
+	size_t original_max_depth_; /**< The original maximum depth of the tree. */
 	size_t terminal_count_;	/**< Number of terminal nodes in the tree. */
 	size_t nonterminal_count_; /**< Number of nonterminal nodes in the tree. */
+
 };
 

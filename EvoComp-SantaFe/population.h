@@ -220,13 +220,6 @@ private:
 	 * @return	A Mersenne Twister Engine seeded by `std::random_device`.
 	 */
 	std::mt19937 &GetEngine();
-	/** 
-	 * Sort the population and make sure the indexes of best and worst
-	 * individuals are updated.
-	 *
-	 * @todo	This is incredibly inefficient currently!
-	 */
-	void Sort(bool reverse_order);
 	std::vector<Individual> pop_;
 	std::vector<TrailMap> maps_;
 	double mutation_rate_;
@@ -239,6 +232,7 @@ private:
 	size_t avg_tree_;
 	size_t total_nodes_;
 	size_t best_index_;
+	size_t second_best_index_;
 	double best_fitness_;
 	double worst_fitness_;
 	double avg_fitness_;

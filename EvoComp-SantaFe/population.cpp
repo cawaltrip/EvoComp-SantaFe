@@ -63,6 +63,9 @@ Population::Population(const Population &copy,
 	tournament_size_ = copy.tournament_size_;
 	proportional_tournament_rate_ = copy.proportional_tournament_rate_;
 
+	best_index_ = copy.best_index_;
+	second_best_index_ = copy.second_best_index_;
+
 	best_fitness_ = copy.best_fitness_;
 	worst_fitness_ = copy.worst_fitness_;
 	avg_fitness_ = copy.avg_fitness_;
@@ -79,13 +82,13 @@ Population::Population(const Population &copy,
 }
 void Population::Evolve(size_t elitism_count) {
 	std::vector<Individual> evolved_pop(pop_.size());
-	/* Elite individual selection uses raw fitness score. */
-	Sort(true);
-	for (size_t i = 0; i < elitism_count; ++i) {
-		evolved_pop[i] = pop_[i];
-	}
+	
+	/** @todo	Get sort function working again.  For now, cheat elitism. */
+	elitism_count = 2;
+	evolved_pop[0] = pop_[best_index_];
+	evolved_pop[1] = pop_[second_best_index_];
 
-	/* Non-elite individual selection uses weighted fitness score. */
+	/* Non-elite individual selection. */
 	for (size_t i = elitism_count; i < evolved_pop.size(); ++i) {
 		size_t p1 = SelectIndividual();
 		size_t p2;
@@ -102,6 +105,18 @@ void Population::Evolve(size_t elitism_count) {
 	}
 	this->pop_ = evolved_pop;
 	CalculateFitness();
+
+	best_index_ = 0;
+	second_best_index_ = 0; /* Cheating elitism */
+
+	for (size_t i = 0; i < pop_.size(); ++i) {
+		if (pop_[i].GetFitness() > pop_[best_index_].GetFitness()) {
+			best_index_ = i;
+		} else if (pop_[i].GetFitness() > 
+				   pop_[second_best_index_].GetFitness()) {
+			second_best_index_ = i;
+		}
+	}
 }
 void Population::CalculateFitness() {
 	double cur_fitness = 0;
@@ -110,7 +125,8 @@ void Population::CalculateFitness() {
 	worst_fitness_ = DBL_MAX;
 
 	for (size_t i = 0; i < pop_.size(); ++i) {
-		pop_[i].CalculateFitness(maps_);
+		pop_[i].CalculateScores(maps_);
+		pop_[i].CalculateFitness();
 		cur_fitness = pop_[i].GetFitness();
 		avg_fitness_ += cur_fitness;
 		if (cur_fitness > best_fitness_) {
@@ -244,7 +260,7 @@ size_t Population::SelectIndividual() {
 			challenger = d(GetEngine());
 		} while (winner != challenger);
 		if (fitness_based) {
-			if (pop_[challenger] > pop_[winner]) {
+			if (pop_[challenger].GetFitness() > pop_[winner].GetFitness()) {
 				winner = challenger;
 			}
 		} else {
@@ -259,13 +275,4 @@ std::mt19937 &Population::GetEngine() {
 	static std::random_device rd;
 	static std::mt19937 mt(rd());
 	return mt;
-}
-void Population::Sort(bool reverse_order) {
-	std::sort(pop_.begin(), pop_.end());
-	if (reverse_order) {
-		std::reverse(pop_.begin(), pop_.end());
-		best_index_ = 0;
-	} else {
-		best_index_ = pop_.size() - 1;
-	}
 }

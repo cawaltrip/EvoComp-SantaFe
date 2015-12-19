@@ -80,17 +80,24 @@ void Individual::CalculateTreeSize() {
 	nonterminal_count_ = 0;
 	root_->CountNodes(terminal_count_, nonterminal_count_);
 }
-void Individual::CalculateFitness(std::vector<TrailMap> maps) {
-	fitness_ = 0.0;
-	for (TrailMap &map : maps) {
-		map.Reset();
-		while (map.HasActionsRemaining()) {
-			root_->Evaluate(map);
-		}
-		fitness_ += 100 * (static_cast<double>(map.GetConsumedFoodCount() / 
-										map.GetTotalFoodCount()));
+void Individual::CalculateScores(std::vector<TrailMap> maps) {
+	RunSimulation(maps);
+
+	scores_.clear();
+	for (auto map : maps) {
+		scores_.emplace_back(std::make_pair(map.GetConsumedFoodCount(),
+											map.GetTotalFoodCount()));
 	}
-	fitness_ = (fitness_ / maps.size());
+}
+void Individual::CalculateFitness() {
+	fitness_ = 0;
+	for (auto score : scores_) {
+		if (score.first && score.second) {
+			fitness_ += static_cast<double>(score.first / score.second);
+		}
+	}
+	fitness_ *= 100;
+	fitness_ /= scores_.size();
 }
 void Individual::CorrectTree() {
 	root_->CorrectNodes(nullptr, 0);
@@ -128,27 +135,14 @@ std::mt19937 &Individual::GetEngine() {
 	static std::mt19937 mt(rd());
 	return mt;
 }
+void Individual::RunSimulation(std::vector<TrailMap> maps) {
+	for (TrailMap &map : maps) {
+		RunSimulation(map);
+	}
+}
 void Individual::RunSimulation(TrailMap &map) {
 	map.Reset();
 	while (map.HasActionsRemaining()) {
 		root_->Evaluate(map);
 	}
-}
-bool Individual::operator==(const Individual &rhs) {
-	return fitness_ == rhs.fitness_;
-}
-bool Individual::operator!=(const Individual &rhs) {
-	return !operator==(rhs);
-}
-bool Individual::operator<(const Individual &rhs) {
-	return fitness_ < rhs.fitness_;
-}
-bool Individual::operator<=(const Individual &rhs) {
-	return operator<(rhs) || operator==(rhs);
-}
-bool Individual::operator>(const Individual &rhs) {
-	return !operator<=(rhs);
-}
-bool Individual::operator>=(const Individual &rhs) {
-	return !operator<(rhs);
 }

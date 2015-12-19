@@ -147,42 +147,39 @@ void ParseCommandLine(int argc, char **argv, Options &opts) {
 		("verbose,v", "print extra logging information");
 	pop_opts.add_options()
 		("generations,g",
-		 po::value<size_t>(&opts.evolution_count_)->default_value(500),
+		 po::value<size_t>(&opts.evolution_count_),
 		 "Number of generations to evolve.")
 		("elitism,e",
-		 po::value<size_t>(&opts.elitism_count_)->default_value(2),
+		 po::value<size_t>(&opts.elitism_count_),
 		 "Number of elite individuals to keep between generations.")
 		("population-size,p",
-		 po::value<size_t>(&opts.population_size_)->default_value(100),
+		 po::value<size_t>(&opts.population_size_),
 		 "Number of individuals in a population.")
 		("action-limit,a",
-		 po::value<size_t>(&opts.action_count_limit_)->default_value(400),
+		 po::value<size_t>(&opts.action_count_limit_),
 		 "Maximum number of actions to evaluate.")
 		("tournament-size,t",
-		 po::value<size_t>(&opts.tournament_size_)->default_value(3),
+		 po::value<size_t>(&opts.tournament_size_),
 		 "Number of Individuals in a tournament.")
 		("proportional-tournament-rate,r",
-		 po::value<double>(&opts.proportional_tournament_rate_)
-		 ->default_value(1.00),
+		 po::value<double>(&opts.proportional_tournament_rate_),
 		 "Rate that tournament is fitness based instead of parsimony based.");
 	indiv_opts.add_options()
 		("mutation,m", 
-		 po::value<double>(&opts.mutation_rate_)->default_value(0.03),
+		 po::value<double>(&opts.mutation_rate_),
 		 "Rate of mutation per node in the tree.")
 		("nonterminal-crossover-rate,n",
-		 po::value<double>(&opts.nonterminal_crossover_rate_)
-		 ->default_value(0.90),
+		 po::value<double>(&opts.nonterminal_crossover_rate_),
 		 "Rate that nonterminals are chosen as crossover point.")
 		("min-depth,d", 
-		 po::value<size_t>(&opts.tree_depth_min_)->default_value(3),
+		 po::value<size_t>(&opts.tree_depth_min_),
 		 "Minimum tree depth.")
 		("max-depth,x", 
-		 po::value<size_t>(&opts.tree_depth_max_)->default_value(6),
+		 po::value<size_t>(&opts.tree_depth_max_),
 		 "Maximum tree depth.");
 	input_opts.add_options()
 		("input,I",
-		 po::value<std::vector<std::string>>(&opts.map_files_)
-		 ->required(),
+		 po::value<std::vector<std::string>>(&opts.map_files_)->required(),
 		 "Specify input file(s)")
 		("secondary,S",
 		 po::value<std::vector<std::string>>(&opts.secondary_map_files_),
@@ -248,8 +245,7 @@ void ParseCommandLine(int argc, char **argv, Options &opts) {
 	}
 
 	if (opts.elitism_count_ > opts.population_size_) {
-		std::cerr << "Population Size must be larger than Elitism Count.  ";
-		std::cerr << "Adjust these values and recompile the program.";
+		std::cerr << "Population Size must be larger than Elitism Count.";
 		std::cerr << std::endl;
 		exit(EXIT_FAILURE);
 	}

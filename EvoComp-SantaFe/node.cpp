@@ -160,7 +160,6 @@ void Node::Mutate(double mutation_chance, size_t max_depth) {
 	}
 }
 void Node::Evaluate(TrailMap &map) {
-	/** @todo	Combone kProg3 and kProg2 and iterate over size of children */
 	switch (op_) {
 	case OpType::kProg3:
 	case OpType::kProg2:

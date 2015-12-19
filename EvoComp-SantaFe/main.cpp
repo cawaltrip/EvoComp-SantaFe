@@ -70,30 +70,33 @@ int main(int argc, char **argv, char **envp) {
 	ParseCommandLine(argc, argv, opts);
 
 	std::vector<TrailMap> maps;
-	std::vector<TrailMap> primary_map;
+	std::vector<TrailMap> secondary_maps;
 	std::vector<TrailMap> verification_maps;
 	std::vector<Population> populations;
 
 	/* Create all the maps */
-	for (std::string f : opts.map_test_suite_files_) {
-		maps.emplace_back(TrailMap(ParseDataFile(f), 
+	for (std::string fn : opts.map_files_) {
+		maps.emplace_back(TrailMap(ParseDataFile(fn), 
 								   opts.action_count_limit_));
 	}
-	if (opts.primary_map_exists_) {
-		primary_map.emplace_back(TrailMap(
-			ParseDataFile(opts.primary_map_file_), opts.action_count_limit_));
+	if (opts.secondary_maps_exist_) {
+		for (std::string fn : opts.secondary_map_files_) {
+			secondary_maps.emplace_back(TrailMap(ParseDataFile(fn), 
+												 opts.action_count_limit_));
+		}
 	}
 	if (opts.verification_maps_exist_) {
-		for (std::string f : opts.verification_map_files_) {
-			verification_maps.emplace_back(TrailMap(ParseDataFile(f),
+		for (std::string fn : opts.verification_map_files_) {
+			verification_maps.emplace_back(TrailMap(ParseDataFile(fn),
 													opts.action_count_limit_));
 		}
 	}
 
 	/* Create the populations */
 	populations.emplace_back(Population(opts, maps));
-	if (opts.primary_map_exists_) {
-		populations.emplace_back(Population(populations.front(), primary_map));
+	if (opts.secondary_maps_exist_) {
+		populations.emplace_back(Population(populations.front(), 
+											secondary_maps));
 	}
 
 	/* Evolve the populations in tandem */
@@ -178,14 +181,15 @@ void ParseCommandLine(int argc, char **argv, Options &opts) {
 		 "Maximum tree depth.");
 	input_opts.add_options()
 		("input,I",
-		 po::value<std::vector<std::string>>(&opts.map_test_suite_files_)
+		 po::value<std::vector<std::string>>(&opts.map_files_)
 		 ->required(),
 		 "Specify input file(s)")
-		("primary,P", po::value<std::string>(&opts.primary_map_file_),
-		 "Primary map file to use if comparing one map to multiple.")
+		("secondary,S",
+		 po::value<std::vector<std::string>>(&opts.secondary_map_files_),
+		 "Secondary set of input file(s) to compare against.")
 		("verification,V",
 		 po::value<std::vector<std::string>>(&opts.verification_map_files_),
-		 "Map list to use as verification if comparing one map to multiple.");
+		 "Set of input file(s) to use for verification but not evolution.");
 	positional_opts.add("input", -1);
 
 	cmd_opts.add(basic_opts).add(pop_opts).add(indiv_opts).add(input_opts);
@@ -206,8 +210,7 @@ void ParseCommandLine(int argc, char **argv, Options &opts) {
 	}
 
 	if (vm.count("input")) {
-		filenames = vm["input"].as<std::vector<std::string>>();
-		for (auto fn : filenames) {
+		for (auto fn : opts.map_files_) {
 			if (!(std::ifstream(fn).good())) {
 				std::cerr << fn << " not found!" << std::endl;
 				exit(EXIT_FAILURE);
@@ -220,14 +223,16 @@ void ParseCommandLine(int argc, char **argv, Options &opts) {
 		exit(EXIT_FAILURE);
 	}
 
-	if (vm.count("primary")) {
-		if (!(std::ifstream(opts.primary_map_file_).good())) {
-			std::cerr << opts.primary_map_file_ << " not found!" << std::endl;
-			exit(EXIT_FAILURE);
+	if (vm.count("secondary")) {
+		for (auto fn : opts.secondary_map_files_) {
+			if (!(std::ifstream(fn).good())) {
+				std::cerr << fn << " not found!" << std::endl;
+				exit(EXIT_FAILURE);
+			}
 		}
-		opts.primary_map_exists_ = true;
+		opts.secondary_maps_exist_ = true;
 	} else {
-		opts.primary_map_exists_ = false;
+		opts.secondary_maps_exist_ = false;
 	}
 
 	if (vm.count("verification")) {

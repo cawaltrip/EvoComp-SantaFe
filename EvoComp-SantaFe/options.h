@@ -40,10 +40,10 @@ struct Options {
 	size_t tournament_size_;
 	size_t tree_depth_min_;
 	size_t tree_depth_max_;
-	std::string primary_map_file_;
-	std::vector<std::string> map_test_suite_files_;
+	std::vector<std::string> map_files_;
+	std::vector<std::string> secondary_map_files_;
 	std::vector<std::string> verification_map_files_;
 
-	bool primary_map_exists_;
+	bool secondary_maps_exist_;
 	bool verification_maps_exist_;
 };

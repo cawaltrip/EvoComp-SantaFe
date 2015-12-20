@@ -276,8 +276,86 @@ void Node::SetChild(size_t child_number, Node *child) {
 size_t Node::GetCurrentDepth() {
 	return depth_;
 }
+std::string Node::CallGraphViz() {
+	return GraphViz();
+}
 std::mt19937 &Node::GetEngine() {
 	static std::random_device rd;
 	static std::mt19937 mt(rd());
 	return mt;
+}
+
+Node::NodeWrapper* Node::Structify(Node *n, int counter) {
+
+	Node::NodeWrapper *t = new Node::NodeWrapper();
+
+	t->node = n;
+	t->node_name = "Node" + std::to_string(counter);
+
+	switch (n->op_) {
+	case OpType::kProg3:
+		t->node_label = "Prog3";
+		t->nonterminal = true;
+		break;
+	case OpType::kProg2:
+		t->node_label = "Prog2";
+		t->nonterminal = true;
+		break;
+	case OpType::kIfFoodAhead:
+		t->node_label = "IfFoodAhead";
+		t->nonterminal = true;
+		break;
+	case OpType::kMoveForward:
+		t->node_label = "Move Forward";
+		t->nonterminal = false;
+		break;
+	case OpType::kTurnLeft:
+		t->node_label = "Turn Left";
+		t->nonterminal = false;
+		break;
+	case OpType::kTurnRight:
+		t->node_label = "Turn Right";
+		t->nonterminal = false;
+		break;
+	}
+	return t;
+}
+
+std::string Node::GraphViz() {
+	std::stringstream ss;
+	int counter = 0;
+	
+	std::deque<std::pair<Node::NodeWrapper*, std::string>> stack;
+	std::pair<Node::NodeWrapper*, std::string> curr;
+
+	stack.emplace_front(std::make_pair(Structify(this,counter), "null"));
+
+	ss << "digraph G {\n";
+
+	while (!stack.empty()) {
+		curr = stack.front();
+		stack.pop_front();
+
+		ss << "\t" << curr.first->node_name << " [shape=";
+		if (!curr.first->nonterminal) {
+			ss << "box";
+		} else {
+			ss << "ellipse";
+		}
+		ss << ",label=\"" << curr.first->node_label << "\"]\n";
+
+		if (curr.second != "null") {
+			// Print out each other cell
+			ss << "\t" << curr.second << " -> " << curr.first->node_name;
+			ss << "\n";
+		}
+
+		for (Node *child : curr.first->node->children_) {
+			++counter;
+			stack.emplace_front(std::make_pair(Structify(child, counter),
+											   curr.first->node_name));
+		}
+	}
+	ss << "}";
+	return ss.str();
 }

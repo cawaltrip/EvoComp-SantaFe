@@ -170,6 +170,7 @@ public:
 	double GetAverageFitness();
 	/** Get a vector of all of the completed maps for the best solution. */
 	std::vector<std::string> GetBestSolutionMap(bool latex);
+	std::string GetBestSolutionGraphViz();
 private:
 	/** 
 	 * Ramped half and half initializes all of the trees in the population.

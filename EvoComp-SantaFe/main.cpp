@@ -103,10 +103,30 @@ int main(int argc, char **argv, char **envp) {
 	for (size_t i = 0; i < opts.evolution_count_; ++i) {
 		for (auto p : populations) {
 			p->Evolve(opts.elitism_count_);
-			if (i % 25 == 0) {
-				std::clog << i << ": " << p->GetBestFitness();
-				std::clog << "(" << p->GetWorstFitness() << ")\n";
+			if (i % 10 == 0) {
+				std::clog << "Generation number " << i << std::endl;
+				std::clog << "=============================================\n";
+				std::clog << "GraphViz Diagram:\n";
+				std::clog << "---------------------------------------------\n";
+				std::clog << p->GetBestSolutionGraphViz() << "\n";
+				std::clog << "---------------------------------------------\n";
+				std::clog << "Solution:\n";
+				std::clog << "---------------------------------------------\n";
 				std::clog << p->BestSolutionToString(true, false) << "\n";
+				std::clog << "---------------------------------------------\n";
+				std::clog << "Map of Solution:\n";
+				std::clog << "---------------------------------------------\n";
+				for (std::string map : p->GetBestSolutionMap(false)) {
+					std::clog << map << "\n";
+					std::clog << "+++++++++++++++++++++++++++++++++++++++++\n";
+				}
+				std::clog << "---------------------------------------------\n";
+				std::clog << "Best (Worst) Fitness:\n";
+				std::clog << "---------------------------------------------\n";
+				std::clog << p->GetBestFitness();
+				std::clog << " (" << p->GetWorstFitness() << ")\n";
+				std::clog << "---------------------------------------------\n";
+				std::clog << std::endl;
 			}
 			/** @todo	Do file IO that's need here. */
 		}

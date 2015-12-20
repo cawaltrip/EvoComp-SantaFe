@@ -153,7 +153,14 @@ public:
 	void SetChild(size_t child_number, Node *child);
 	/** Returns the depth of this node in the tree. */
 	size_t GetCurrentDepth();
+	std::string CallGraphViz();
 private:
+	struct NodeWrapper {
+		Node* node;
+		std::string node_name; /* Mangled name for identification purposes */
+		std::string node_label; /* Label representing the type of node */
+		bool nonterminal; /* Terminal or nonterminal */
+	};
 	/**
 	 * A static random engine that can be shared throughout the entire class.
 	 * Based on the idea found in:
@@ -166,16 +173,22 @@ private:
 	 * @return	A Mersenne Twister Engine seeded by `std::random_device`.
 	 */
 	std::mt19937 &GetEngine();
+	NodeWrapper* Structify(Node *root, int counter);
+	std::string GraphViz();
+
 	/** A pointer to the parent node or `nullptr` if the root of the tree */
 	Node *parent_;
 	/** Pointers to children nodes. */
 	std::vector<Node*> children_;
-	/** 
+	/**
 	 * The operator type of the node.  This is used to determine whether the
-	 * node is terminal or nonterminal and for determining how to traverse 
-	 * the subtree.  The depth is simply how far into the tree we are.  This 
+	 * node is terminal or nonterminal and for determining how to traverse
+	 * the subtree.  The depth is simply how far into the tree we are.  This
 	 * is used to help curb code growth.
 	 */
 	OpType op_;
 	size_t depth_;
+
+	
+
 };

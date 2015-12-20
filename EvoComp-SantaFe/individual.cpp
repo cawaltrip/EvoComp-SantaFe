@@ -130,6 +130,9 @@ std::vector<std::string> Individual::PrintSolvedMap(
 	}
 	return printed_maps;
 }
+std::string Individual::CallGraphViz() {
+	return root_->CallGraphViz();
+}
 std::mt19937 &Individual::GetEngine() {
 	static std::random_device rd;
 	static std::mt19937 mt(rd());

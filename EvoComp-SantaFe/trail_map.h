@@ -92,7 +92,7 @@ public:
 	TrailMap(std::vector<std::string> map_file, size_t step_limit);
 	/** Explicitly set a cell's contents. Checks bounds. */
 	void SetCell(size_t row, size_t column, TrailData data);
-	/** Retrieve the value at a given point.  Doesn't check bounds. */
+	/** Retrieve the value at a given point.  Wraps around bounds. */
 	TrailData GetCell(size_t row, size_t column);
 	/** Return the total number of food on the map. */
 	size_t GetTotalFoodCount();

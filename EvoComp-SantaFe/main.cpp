@@ -28,14 +28,9 @@
  *
  */
 /**
- * @todo	I think the fact that the map is toroidal (wraps around) is
- *			causing some of the issues with no getting any solutions, so I'm
- *			going to remove that feature for now and make fitness just a raw
- *			score of number of food eaten regardless of number of maps or
- *			total number of food on the map.  Another thing I could possibly
- *			do is force IfFoodAhead to move forward to collect the food.
- *			Before I do any of this, I'm going to walk through the execution
- *			and make sure there isn't a bug causing all of these issues.
+ * @todo	Go through and make sure documentation is updated everywhere.
+ * @todo	Implement some sort of parsimony pressure in addition to or 
+ *			instead of parsimony selection?
  */
 #include <fstream>
 #include <iostream>

@@ -80,19 +80,6 @@ std::vector<std::string> ParseDataFile(std::string filename);
 void WriteOutputFile(std::ofstream &out, double best_fitness,
 					  double avg_fitness, size_t best_solution_size,
 					  size_t avg_size);
-/** 
- * Return a string formatted to write to file.
- *
- * @param[in]	best_fitness		The fitness score of the best indiviudal.
- * @param[in]	avg_fitness			The average fitness of the generation.
- * @param[in]	best_solution_size	Tree size of the best individual.
- * @param[in]	avg_size			Average tree size of the generation.
- *
- * @return	The parameters separated by commas and formatted as 
- *			a `std::string`.
- */
-std::string FormatOutputFile(double best_fitness, double avg_fitness,
-							 size_t best_solution_size, size_t avg_size);
 /* 
  * All of the command line options are stored in this object and this object
  * is passed where needed to read the options.
@@ -143,10 +130,11 @@ int main(int argc, char **argv, char **envp) {
 	for (size_t i = 0; i < opts.evolution_count_; ++i) {
 		for (auto p : populations) {
 			p.first->Evolve();
-			p.second << FormatOutputFile(p.first->GetBestFitness(), 
-										 p.first->GetAverageFitness(), 
-										 p.first->GetBestTreeSize(), 
-										 p.first->GetAverageTreeSize());
+			WriteOutputFile(p.second,
+							p.first->GetBestFitness(), 
+							p.first->GetAverageFitness(), 
+							p.first->GetBestTreeSize(), 
+							p.first->GetAverageTreeSize());
 			p.second << "\n";
 			
 			if (i % 10 == 0) {
@@ -350,11 +338,4 @@ void WriteOutputFile(std::ofstream &out, double best_fitness,
 							 size_t avg_size) {
 	out << best_fitness << "," << best_solution_size << ",";
 	out << avg_fitness << "," << avg_size << "\n";
-}
-std::string FormatOutputFile(double best_fitness, double avg_fitness, 
-					  size_t best_solution_size, size_t avg_size) {
-	std::stringstream ss;
-	ss << best_fitness << "," << best_solution_size << ",";
-	ss << avg_fitness << "," << avg_size;
-	return ss.str();
 }

@@ -28,7 +28,7 @@ Population::Population(size_t population_size, double mutation_rate,
 					   double nonterminal_crossover_rate, 
 					   size_t tournament_size, 
 					   double proportional_tournament_rate, size_t depth_min, 
-					   size_t depth_max, std::vector<TrailMap> maps) {
+					   size_t depth_max, std::vector<TrailMap*> maps) {
 	maps_ = maps;
 	mutation_rate_ = mutation_rate;
 	nonterminal_crossover_rate_ = nonterminal_crossover_rate;
@@ -50,13 +50,13 @@ Population::Population(size_t population_size, double mutation_rate,
 	RampedHalfAndHalf(population_size, depth_min, depth_max);
 	CalculateFitness();
 }
-Population::Population(Options opts, std::vector<TrailMap> maps) : 
+Population::Population(Options opts, std::vector<TrailMap*> maps) : 
 	Population(opts.population_size_, opts.mutation_rate_, 
 			   opts.nonterminal_crossover_rate_, opts.tournament_size_, 
 			   opts.proportional_tournament_rate_, opts.tree_depth_min_, 
 			   opts.tree_depth_max_, maps) {}
 Population::Population(const Population &copy, 
-					   std::vector<TrailMap> new_maps) {
+					   std::vector<TrailMap*> new_maps) {
 	maps_ = new_maps;
 	mutation_rate_ = copy.mutation_rate_;
 	nonterminal_crossover_rate_ = copy.nonterminal_crossover_rate_;
@@ -64,7 +64,6 @@ Population::Population(const Population &copy,
 	proportional_tournament_rate_ = copy.proportional_tournament_rate_;
 
 	best_index_ = copy.best_index_;
-	second_best_index_ = copy.second_best_index_;
 
 	best_fitness_ = copy.best_fitness_;
 	worst_fitness_ = copy.worst_fitness_;
@@ -80,16 +79,13 @@ Population::Population(const Population &copy,
 		pop_[i] = new_individual;
 	}
 }
-void Population::Evolve(size_t elitism_count) {
+void Population::Evolve() {
 	std::vector<Individual> evolved_pop(pop_.size());
 	
-	/** @todo	Get sort function working again.  For now, cheat elitism. */
-	elitism_count = 2;
 	evolved_pop[0] = pop_[best_index_];
-	evolved_pop[1] = pop_[second_best_index_];
 
 	/* Non-elite individual selection. */
-	for (size_t i = elitism_count; i < evolved_pop.size(); ++i) {
+	for (size_t i = 1; i < evolved_pop.size(); ++i) {
 		size_t p1 = SelectIndividual();
 		size_t p2;
 		do {
@@ -105,18 +101,6 @@ void Population::Evolve(size_t elitism_count) {
 	}
 	this->pop_ = evolved_pop;
 	CalculateFitness();
-
-	best_index_ = 0;
-	second_best_index_ = 0; /* Cheating elitism */
-
-	for (size_t i = 0; i < pop_.size(); ++i) {
-		if (pop_[i].GetFitness() > pop_[best_index_].GetFitness()) {
-			best_index_ = i;
-		} else if (pop_[i].GetFitness() > 
-				   pop_[second_best_index_].GetFitness()) {
-			second_best_index_ = i;
-		}
-	}
 }
 void Population::CalculateFitness() {
 	double cur_fitness = 0;
@@ -131,12 +115,12 @@ void Population::CalculateFitness() {
 		avg_fitness_ += cur_fitness;
 		if (cur_fitness > best_fitness_) {
 			best_fitness_ = cur_fitness;
-			best_index_ = i;
 		} else if (cur_fitness < worst_fitness_) {
 			worst_fitness_ = cur_fitness;
 		}
 	}
 	avg_fitness_ = avg_fitness_ / pop_.size();
+	SetElite();
 }
 void Population::CalculateTreeSize() {
 	size_t cur_tree = 0;
@@ -156,7 +140,7 @@ void Population::CalculateTreeSize() {
 	total_nodes_ = avg_tree_;
 	avg_tree_ = avg_tree_ / pop_.size();
 }
-void Population::SetMaps(std::vector<TrailMap> maps) {
+void Population::SetMaps(std::vector<TrailMap*> maps) {
 	maps_ = maps;
 }
 std::string Population::ToString(bool include_fitness, bool latex) {
@@ -177,6 +161,9 @@ std::string Population::BestSolutionToString(bool include_fitness,
 	}
 	ss << pop_[best_index_].ToString(latex);
 	return ss.str();
+}
+size_t Population::GetBestTreeSize() {
+	return pop_[best_index_].GetTreeSize();
 }
 size_t Population::GetLargestTreeSize() {
 	return largest_tree_;
@@ -261,10 +248,10 @@ size_t Population::SelectIndividual() {
 	for (size_t i = 0; i < tournament_size_; ++i) {
 		do {
 			challenger = d(GetEngine());
-		} while (winner != challenger);
+		} while (winner == challenger);
 		if (fitness_based) {
 			if (pop_[challenger].GetFitness() > pop_[winner].GetFitness()) {
-				winner = challenger;
+				winner = challenger; 
 			}
 		} else {
 			if (pop_[challenger].GetTreeSize() < pop_[winner].GetTreeSize()) {
@@ -273,6 +260,15 @@ size_t Population::SelectIndividual() {
 		}
 	}
 	return winner;
+}
+void Population::SetElite() {
+	best_index_ = 0;
+
+	for (size_t i = 0; i < pop_.size(); ++i) {
+		if (pop_[i].GetFitness() > pop_[best_index_].GetFitness()) {
+			best_index_ = i;
+		}
+	}
 }
 std::mt19937 &Population::GetEngine() {
 	static std::random_device rd;

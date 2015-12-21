@@ -68,9 +68,9 @@ public:
 	Population(size_t population_size, double mutation_rate, 
 			   double nonterminal_crossover_rate, size_t tournament_size, 
 			   double proportional_tournament_rate, size_t depth_min, 
-			   size_t depth_max, std::vector<TrailMap> maps);
-	Population(Options opts, std::vector<TrailMap> maps);
-	Population(const Population &copy, std::vector<TrailMap> new_maps);
+			   size_t depth_max, std::vector<TrailMap*> maps);
+	Population(Options opts, std::vector<TrailMap*> maps);
+	Population(const Population &copy, std::vector<TrailMap*> new_maps);
 	/** 
 	 * The evolve function is the wrapper for the different stages of
 	 * evolution for the genetic program.  Specifically, `Evolve()` selects
@@ -88,7 +88,7 @@ public:
 	 * @todo	Properly implement Elitism.  Will require sorting the entire
 	 *			population.
 	 */
-	void Evolve(size_t elitism_count = 2);
+	void Evolve();
 	/**
 	 * Calculate the fitness of an individual based on the genetic program
 	 * represented by the tree of an individual.
@@ -103,7 +103,7 @@ public:
 	 * Sets the maps that the Individuals in the population will calculuate
 	 * their fitness based on.
 	 */
-	void SetMaps(std::vector<TrailMap> maps);
+	void SetMaps(std::vector<TrailMap*> maps);
 	/** 
 	 * Returns the `ToString()` function of every individual in the population.
 	 * 
@@ -123,6 +123,13 @@ public:
 	 * @return	The `ToString()` of the individual with the best raw fitness.
 	 */
 	std::string BestSolutionToString(bool include_fitness, bool latex);
+	/**
+	 * Returns the tree size of the best individual in the population.
+	 *
+	 * @return The combined total of nonterminal and terminal nodes in the
+	 *			tree of the best individual.
+	 */
+	size_t GetBestTreeSize();
 	/**
 	 * Returns the number of nodes in the largest tree.
 	 *
@@ -209,6 +216,10 @@ private:
 	 * help prevent code growth.
 	 */
 	size_t SelectIndividual();
+	/** 
+	 * Determine and set the indices of the two best individuals.
+	 */
+	void SetElite();
 	/**
 	 * A static random engine that can be shared throughout the entire class.
 	 * Based on the idea found in:
@@ -222,7 +233,7 @@ private:
 	 */
 	std::mt19937 &GetEngine();
 	std::vector<Individual> pop_;
-	std::vector<TrailMap> maps_;
+	std::vector<TrailMap*> maps_;
 	double mutation_rate_;
 	double nonterminal_crossover_rate_;
 	size_t tournament_size_;
@@ -233,7 +244,6 @@ private:
 	size_t avg_tree_;
 	size_t total_nodes_;
 	size_t best_index_;
-	size_t second_best_index_;
 	double best_fitness_;
 	double worst_fitness_;
 	double avg_fitness_;

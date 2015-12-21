@@ -80,24 +80,25 @@ void Individual::CalculateTreeSize() {
 	nonterminal_count_ = 0;
 	root_->CountNodes(terminal_count_, nonterminal_count_);
 }
-void Individual::CalculateScores(std::vector<TrailMap> maps) {
+void Individual::CalculateScores(std::vector<TrailMap*> maps) {
 	RunSimulation(maps);
 
 	scores_.clear();
-	for (auto map : maps) {
-		scores_.emplace_back(std::make_pair(map.GetConsumedFoodCount(),
-											map.GetTotalFoodCount()));
+	for (TrailMap *map : maps) {
+		scores_.emplace_back(std::make_pair(map->GetConsumedFoodCount(),
+											map->GetTotalFoodCount()));
 	}
 }
 void Individual::CalculateFitness() {
 	fitness_ = 0;
+	size_t total_count = 0;
 	for (auto score : scores_) {
-		if (score.first && score.second) {
-			fitness_ += static_cast<double>(score.first / score.second);
-		}
+		fitness_ += static_cast<double>(score.first);
+		total_count += score.second;
 	}
 	fitness_ *= 100;
-	fitness_ /= scores_.size();
+	fitness_ = fitness_ / total_count; /* Divide by zero is okay here. */
+	fitness_ = fitness_ / scores_.size();
 }
 void Individual::CorrectTree() {
 	root_->CorrectNodes(nullptr, 0);
@@ -122,11 +123,11 @@ void Individual::SetRootNode(Node *root) {
 	root_ = root;
 }
 std::vector<std::string> Individual::PrintSolvedMap(
-	std::vector<TrailMap> maps, bool latex) {
+	std::vector<TrailMap*> maps, bool latex) {
 	std::vector<std::string> printed_maps;
-	for (TrailMap &map : maps) {
+	for (TrailMap *map : maps) {
 		RunSimulation(map);
-		printed_maps.emplace_back(map.ToString(latex));
+		printed_maps.emplace_back(map->ToString(latex));
 	}
 	return printed_maps;
 }
@@ -138,14 +139,14 @@ std::mt19937 &Individual::GetEngine() {
 	static std::mt19937 mt(rd());
 	return mt;
 }
-void Individual::RunSimulation(std::vector<TrailMap> maps) {
-	for (TrailMap &map : maps) {
+void Individual::RunSimulation(std::vector<TrailMap*> maps) {
+	for (TrailMap *map : maps) {
 		RunSimulation(map);
 	}
 }
-void Individual::RunSimulation(TrailMap &map) {
-	map.Reset();
-	while (map.HasActionsRemaining()) {
+void Individual::RunSimulation(TrailMap *map) {
+	map->Reset();
+	while (map->HasActionsRemaining()) {
 		root_->Evaluate(map);
 	}
 }

@@ -159,7 +159,7 @@ void Node::Mutate(double mutation_chance, size_t max_depth) {
 		}
 	}
 }
-void Node::Evaluate(TrailMap &map) {
+void Node::Evaluate(TrailMap *map) {
 	switch (op_) {
 	case OpType::kProg3:
 	case OpType::kProg2:
@@ -168,20 +168,20 @@ void Node::Evaluate(TrailMap &map) {
 		}
 		break;
 	case OpType::kIfFoodAhead:
-		if (map.IsFoodAhead()) {
+		if (map->IsFoodAhead()) {
 			children_[0]->Evaluate(map);
 		} else {
 			children_[1]->Evaluate(map);
 		}
 		break;
 	case OpType::kMoveForward:
-		map.MoveForward();
+		map->MoveForward();
 		break;
 	case OpType::kTurnLeft:
-		map.TurnLeft();
+		map->TurnLeft();
 		break;
 	case OpType::kTurnRight:
-		map.TurnRight();
+		map->TurnRight();
 		break;
 	}
 }
@@ -284,7 +284,6 @@ std::mt19937 &Node::GetEngine() {
 	static std::mt19937 mt(rd());
 	return mt;
 }
-
 Node::NodeWrapper* Node::Structify(Node *n, int counter) {
 
 	Node::NodeWrapper *t = new Node::NodeWrapper();
@@ -320,7 +319,6 @@ Node::NodeWrapper* Node::Structify(Node *n, int counter) {
 	}
 	return t;
 }
-
 std::string Node::GraphViz() {
 	std::stringstream ss;
 	int counter = 0;
@@ -333,8 +331,8 @@ std::string Node::GraphViz() {
 	ss << "digraph G {\n";
 
 	while (!stack.empty()) {
-		curr = stack.front();
-		stack.pop_front();
+		curr = stack.back();
+		stack.pop_back();
 
 		ss << "\t" << curr.first->node_name << " [shape=";
 		if (!curr.first->nonterminal) {

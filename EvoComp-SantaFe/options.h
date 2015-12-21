@@ -30,20 +30,23 @@
  * the option parser and the main function for organization and cleanliness.
  */
 struct Options {
-	size_t evolution_count_ = 100;
-	size_t elitism_count_ = 2;
-	size_t population_size_ = 100;
-	size_t action_count_limit_ = 300;
+	size_t evolution_count_ = 1000;
+	size_t population_size_ = 200;
+	size_t action_count_limit_ = 400;
 	double mutation_rate_ = 0.03;
 	double nonterminal_crossover_rate_ = 0.90;
-	double proportional_tournament_rate_ = 1.0; /* Between 0 and 1 */
+	double proportional_tournament_rate_ = 0.7; /* Between 0 and 1 */
 	size_t tournament_size_ = 3;
 	size_t tree_depth_min_ = 3;
 	size_t tree_depth_max_ = 6;
 	std::vector<std::string> map_files_;
 	std::vector<std::string> secondary_map_files_;
 	std::vector<std::string> verification_map_files_;
-
+	std::string graphviz_file_ = "sf_graphviz.dot";
+	std::string output_file_ = "sf_output.csv";
+	std::string secondary_output_file_ = "sf_secondary_output.csv";
+	std::string verification_output_file_ = "sf_verification_output.csv";
 	bool secondary_maps_exist_;
 	bool verification_maps_exist_;
+	bool graphviz_file_exists_;
 };

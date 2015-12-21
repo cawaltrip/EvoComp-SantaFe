@@ -90,7 +90,7 @@ public:
 	 *							stop execution and the Map will contain the
 	 *							number of food eaten.
 	 */
-	void Evaluate(TrailMap &map);
+	void Evaluate(TrailMap *map);
 	/**
 	 * Select a node from the tree.  Iteratively searches the tree,
 	 * decrementing the `countdown` number each time only when a node

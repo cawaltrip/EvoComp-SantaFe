@@ -72,6 +72,9 @@ void TrailMap::Reset() {
 	
 	/* Reset food count totals */
 	SetTotalFoodCount();
+
+	/* Reset Action Count */
+	current_action_count_ = 0;
 }
 size_t TrailMap::GetTotalFoodCount() {
 	return total_food_;
@@ -112,12 +115,19 @@ void TrailMap::MoveForward() {
 		exit(EXIT_FAILURE);
 	}
 	++current_action_count_;
-	if (GetCell(ant_.x, ant_.y) == TrailData::kUnvisitedFood) {
-		SetCell(ant_.x, ant_.y, TrailData::kVisitedFood);
+
+	TrailData new_data;
+	switch (GetCell(ant_.y, ant_.x)) {
+	case TrailData::kUnvisitedEmpty:
+	case TrailData::kVisitedEmpty:
+		new_data = TrailData::kVisitedEmpty;
+		break;
+	case TrailData::kUnvisitedFood:
 		++consumed_food_;
-	} else {
-		SetCell(ant_.x, ant_.y, TrailData::kVisitedEmpty);
+	case TrailData::kVisitedFood:
+		new_data = TrailData::kVisitedFood;
 	}
+	SetCell(ant_.y, ant_.x, new_data);
 }
 void TrailMap::TurnLeft() {
 	/* Short-circuit execution if the ant is over the action limit. */
@@ -189,14 +199,12 @@ bool TrailMap::HasActionsRemaining() {
 TrailData TrailMap::ConvertCharToTrailData(char c) {
 	switch (c) {
 	case '_':
-	case '-':
 		return TrailData::kUnvisitedEmpty;
-	case 'X':
-	case 'x':
-		return TrailData::kUnvisitedFood;
-	case '+':
-		return TrailData::kVisitedEmpty;
 	case '*':
+		return TrailData::kUnvisitedFood;
+	case 'x':
+		return TrailData::kVisitedEmpty;
+	case 'X':
 		return TrailData::kVisitedFood;
 	}
 	return TrailData::kUnvisitedEmpty;
@@ -206,11 +214,11 @@ char TrailMap::ConvertTrailDataToChar(TrailData d) {
 	case TrailData::kUnvisitedEmpty: 
 		return '_';
 	case TrailData::kUnvisitedFood: 
-		return 'X';
-	case TrailData::kVisitedEmpty: 
-		return '+';
-	case TrailData::kVisitedFood: 
 		return '*';
+	case TrailData::kVisitedEmpty: 
+		return 'x';
+	case TrailData::kVisitedFood: 
+		return 'X';
 	}
 	return '?';
 }

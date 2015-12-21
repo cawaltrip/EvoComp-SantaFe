@@ -27,9 +27,19 @@
  * @date 23 November 2015
  *
  */
-
+/**
+ * @todo	I think the fact that the map is toroidal (wraps around) is
+ *			causing some of the issues with no getting any solutions, so I'm
+ *			going to remove that feature for now and make fitness just a raw
+ *			score of number of food eaten regardless of number of maps or
+ *			total number of food on the map.  Another thing I could possibly
+ *			do is force IfFoodAhead to move forward to collect the food.
+ *			Before I do any of this, I'm going to walk through the execution
+ *			and make sure there isn't a bug causing all of these issues.
+ */
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
 #include <boost/program_options.hpp>
@@ -63,88 +73,125 @@ namespace po = boost::program_options;
   *			contents of the file read in.
   */
 std::vector<std::string> ParseDataFile(std::string filename);
-
+/**
+ * Write the fitness and tree information to the file stream object passed in.
+ *
+ * @param[out]	out					File stream object to write to.
+ * @param[in]	best_fitness		The fitness score of the best indiviudal.
+ * @param[in]	avg_fitness			The average fitness of the generation.
+ * @param[in]	best_solution_size	Tree size of the best individual.
+ * @param[in]	avg_size			Average tree size of the generation.
+ */
+void WriteOutputFile(std::ofstream &out, double best_fitness,
+					  double avg_fitness, size_t best_solution_size,
+					  size_t avg_size);
+/** 
+ * Return a string formatted to write to file.
+ *
+ * @param[in]	best_fitness		The fitness score of the best indiviudal.
+ * @param[in]	avg_fitness			The average fitness of the generation.
+ * @param[in]	best_solution_size	Tree size of the best individual.
+ * @param[in]	avg_size			Average tree size of the generation.
+ *
+ * @return	The parameters separated by commas and formatted as 
+ *			a `std::string`.
+ */
+std::string FormatOutputFile(double best_fitness, double avg_fitness,
+							 size_t best_solution_size, size_t avg_size);
+/* 
+ * All of the command line options are stored in this object and this object
+ * is passed where needed to read the options.
+ */
 static Options opts;
 
 int main(int argc, char **argv, char **envp) {
 	ParseCommandLine(argc, argv, opts);
 
-	std::vector<TrailMap> maps;
-	std::vector<TrailMap> secondary_maps;
-	std::vector<TrailMap> verification_maps;
-	std::vector<Population*> populations;
+	std::vector<TrailMap*> maps;
+	std::vector<TrailMap*> secondary_maps;
+	std::vector<TrailMap*> verification_maps;
+	std::vector<std::pair<Population*,std::ofstream&>> populations;
 
 	/* Create all the maps */
 	for (std::string fn : opts.map_files_) {
-		maps.emplace_back(TrailMap(ParseDataFile(fn), 
+		maps.emplace_back(new TrailMap(ParseDataFile(fn), 
 								   opts.action_count_limit_));
 	}
 	if (opts.secondary_maps_exist_) {
 		for (std::string fn : opts.secondary_map_files_) {
-			secondary_maps.emplace_back(TrailMap(ParseDataFile(fn), 
+			secondary_maps.emplace_back(new TrailMap(ParseDataFile(fn), 
 												 opts.action_count_limit_));
 		}
 	}
 	if (opts.verification_maps_exist_) {
 		for (std::string fn : opts.verification_map_files_) {
-			verification_maps.emplace_back(TrailMap(ParseDataFile(fn),
+			verification_maps.emplace_back(new TrailMap(ParseDataFile(fn),
 													opts.action_count_limit_));
 		}
 	}
 
 	/* Create the populations */
-	populations.emplace_back(new Population(opts, maps));
+	populations.emplace_back(
+		std::make_pair(new Population(opts, maps), 
+					   std::ofstream(opts.output_file_,
+									 std::ios::out | std::ios::trunc)));
 	if (opts.secondary_maps_exist_) {
-		populations.emplace_back(new Population(*populations.front(),
-												secondary_maps));
+		/** @todo	Would secondary_output_file lose scope if declared here? */
+		populations.emplace_back(
+			std::make_pair(new Population(*(populations.front().first), 
+										  secondary_maps),
+						   std::ofstream(opts.secondary_output_file_, 
+										 std::ios::out | std::ios::trunc)));
 	}
 
 	/* Evolve the populations in tandem */
 	for (size_t i = 0; i < opts.evolution_count_; ++i) {
 		for (auto p : populations) {
-			p->Evolve(opts.elitism_count_);
+			p.first->Evolve();
+			p.second << FormatOutputFile(p.first->GetBestFitness(), 
+										 p.first->GetAverageFitness(), 
+										 p.first->GetBestTreeSize(), 
+										 p.first->GetAverageTreeSize());
+			p.second << "\n";
+			
 			if (i % 10 == 0) {
-				std::clog << "Generation number " << i << std::endl;
-				std::clog << "=============================================\n";
-				std::clog << "GraphViz Diagram:\n";
-				std::clog << "---------------------------------------------\n";
-				std::clog << p->GetBestSolutionGraphViz() << "\n";
-				std::clog << "---------------------------------------------\n";
-				std::clog << "Solution:\n";
-				std::clog << "---------------------------------------------\n";
-				std::clog << p->BestSolutionToString(true, false) << "\n";
-				std::clog << "---------------------------------------------\n";
-				std::clog << "Map of Solution:\n";
-				std::clog << "---------------------------------------------\n";
-				for (std::string map : p->GetBestSolutionMap(false)) {
-					std::clog << map << "\n";
-					std::clog << "+++++++++++++++++++++++++++++++++++++++++\n";
-				}
-				std::clog << "---------------------------------------------\n";
-				std::clog << "Best (Worst) Fitness:\n";
-				std::clog << "---------------------------------------------\n";
-				std::clog << p->GetBestFitness();
-				std::clog << " (" << p->GetWorstFitness() << ")\n";
-				std::clog << "---------------------------------------------\n";
-				std::clog << std::endl;
+				std::clog << "Generation " << i << " completed.\n";
 			}
-			/** @todo	Do file IO that's need here. */
+			if (i % 100 == 0) {
+				std::clog << "Current best solution: \n";
+				std::clog << FormatOutputFile(p.first->GetBestFitness(),
+											  p.first->GetAverageFitness(),
+											  p.first->GetBestTreeSize(),
+											  p.first->GetAverageTreeSize());
+				std::clog << "\n";
+				std::clog << p.first->GetBestSolutionGraphViz();
+				std::clog << "\n";
+			}
 		}
+		}
+	for (auto p : populations) {
+		p.second.flush(); /* @todo	Does close() already do this? */
+		p.second.close();
 	}
-
 	/*
 	 * Evolution is done.  Write last of results to file.  If a verification 
 	 * map set exists, then run all the populations through the maps.
 	 */
 	if (opts.verification_maps_exist_) {
+		std::ofstream verification_output_file;
+		verification_output_file.open(opts.verification_output_file_,
+									  std::ios::out | std::ios::trunc);
 		for (auto p : populations) {
-			p->SetMaps(verification_maps);
+			p.first->SetMaps(verification_maps);
+			p.first->CalculateFitness();
+			WriteOutputFile(verification_output_file,
+							p.first->GetBestFitness(),
+							p.first->GetAverageFitness(),
+							p.first->GetBestTreeSize(),
+							p.first->GetAverageTreeSize());
 		}
-		for (auto p : populations) {
-			p->CalculateFitness();
-			std::clog << "Verification: " << p->GetBestFitness() << "\n";
-			/** @todo	Do new necessary file IO here. */
-		}
+		verification_output_file.flush();
+		verification_output_file.close();
 	}
 
 	return 0;
@@ -156,7 +203,7 @@ void ParseCommandLine(int argc, char **argv, Options &opts) {
 	po::options_description basic_opts("Basic Options");
 	po::options_description pop_opts("Population Options");
 	po::options_description indiv_opts("Individual Options");
-	po::options_description input_opts("Input File Options");
+	po::options_description io_opts("Input/Output File Options");
 	po::options_description cmd_opts;
 	po::positional_options_description positional_opts;
 	po::variables_map vm;
@@ -169,9 +216,6 @@ void ParseCommandLine(int argc, char **argv, Options &opts) {
 		("generations,g",
 		 po::value<size_t>(&opts.evolution_count_),
 		 "Number of generations to evolve.")
-		("elitism,e",
-		 po::value<size_t>(&opts.elitism_count_),
-		 "Number of elite individuals to keep between generations.")
 		("population-size,p",
 		 po::value<size_t>(&opts.population_size_),
 		 "Number of individuals in a population.")
@@ -197,7 +241,7 @@ void ParseCommandLine(int argc, char **argv, Options &opts) {
 		("max-depth,x", 
 		 po::value<size_t>(&opts.tree_depth_max_),
 		 "Maximum tree depth.");
-	input_opts.add_options()
+	io_opts.add_options()
 		("input,I",
 		 po::value<std::vector<std::string>>(&opts.map_files_)->required(),
 		 "Specify input file(s)")
@@ -206,10 +250,22 @@ void ParseCommandLine(int argc, char **argv, Options &opts) {
 		 "Secondary set of input file(s) to compare against.")
 		("verification,V",
 		 po::value<std::vector<std::string>>(&opts.verification_map_files_),
-		 "Set of input file(s) to use for verification but not evolution.");
+		 "Set of input file(s) to use for verification but not evolution.")
+		("graphviz,G",
+		 po::value<std::string>(&opts.graphviz_file_),
+		 "Specify the file for GraphViz output file.")
+		("output,O", po::value<std::string>(&opts.output_file_),
+		 "Output file location for main GP population.")
+		("secondary-output,T",
+		 po::value<std::string>(&opts.secondary_output_file_),
+		 "Output file for secondary GP population.")
+		("verification-output,W",
+		 po::value<std::string>(&opts.verification_output_file_),
+		 "Output file for verification GP population.");
+
 	positional_opts.add("input", -1);
 
-	cmd_opts.add(basic_opts).add(pop_opts).add(indiv_opts).add(input_opts);
+	cmd_opts.add(basic_opts).add(pop_opts).add(indiv_opts).add(io_opts);
 
 	po::store(po::command_line_parser(argc, argv).options(cmd_opts)
 			  .positional(positional_opts).run(), vm);
@@ -264,10 +320,10 @@ void ParseCommandLine(int argc, char **argv, Options &opts) {
 		opts.verification_maps_exist_ = false;
 	}
 
-	if (opts.elitism_count_ > opts.population_size_) {
-		std::cerr << "Population Size must be larger than Elitism Count.";
-		std::cerr << std::endl;
-		exit(EXIT_FAILURE);
+	if (vm.count("graphviz")) {
+		opts.graphviz_file_exists_ = true;
+	} else {
+		opts.graphviz_file_exists_ = false;
 	}
 }
 std::string GetUsageString(std::string program_name) {
@@ -293,4 +349,17 @@ std::vector<std::string> ParseDataFile(std::string filename) {
 		map_file_contents.push_back(line);
 	}
 	return map_file_contents;
+}
+void WriteOutputFile(std::ofstream &out, double best_fitness, 
+							 double avg_fitness, size_t best_solution_size, 
+							 size_t avg_size) {
+	out << best_fitness << "," << best_solution_size << ",";
+	out << avg_fitness << "," << avg_size << "\n";
+}
+std::string FormatOutputFile(double best_fitness, double avg_fitness, 
+					  size_t best_solution_size, size_t avg_size) {
+	std::stringstream ss;
+	ss << best_fitness << "," << best_solution_size << ",";
+	ss << avg_fitness << "," << avg_size;
+	return ss.str();
 }

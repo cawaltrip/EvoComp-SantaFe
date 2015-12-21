@@ -81,7 +81,7 @@ public:
 	/**
 	 * Calculate the scores of the individual based on the maps given.
 	 */
-	void CalculateScores(std::vector<TrailMap> maps);
+	void CalculateScores(std::vector<TrailMap*> maps);
 	/**
 	 * Calculate the fitness of the individual based on the scores that were
 	 * set previously.
@@ -112,7 +112,7 @@ public:
 	 * Return a `std::string` representation of a map with the route the ant
 	 * traversed shown.
 	 */
-	std::vector<std::string> PrintSolvedMap(std::vector<TrailMap> maps,
+	std::vector<std::string> PrintSolvedMap(std::vector<TrailMap*> maps,
 											bool latex);
 	std::string CallGraphViz();
 private:
@@ -129,9 +129,9 @@ private:
 	 */
 	std::mt19937 &GetEngine();
 	/** Run the genetic program on a list of maps */
-	void RunSimulation(std::vector<TrailMap> maps);
+	void RunSimulation(std::vector<TrailMap*> maps);
 	/** Run the genetic program on a single map */
-	void RunSimulation(TrailMap &map);
+	void RunSimulation(TrailMap *map);
 	
 	Node *root_; /**< Root node of the solution tree. */
 	std::vector<std::pair<size_t, size_t>> scores_; /**< Raw food counts. */

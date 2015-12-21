@@ -98,7 +98,6 @@ void Individual::CalculateFitness() {
 	}
 	fitness_ *= 100;
 	fitness_ = fitness_ / total_count; /* Divide by zero is okay here. */
-	fitness_ = fitness_ / scores_.size();
 }
 void Individual::CorrectTree() {
 	root_->CorrectNodes(nullptr, 0);

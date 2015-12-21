@@ -118,6 +118,11 @@ int main(int argc, char **argv, char **envp) {
 		std::make_pair(new Population(opts, maps),
 					   new std::ofstream(opts.output_file_,
 										 std::ios::out | std::ios::trunc)));
+	if (!populations.back().second->is_open()) {
+		std::cerr << "Could not open output file: ";
+		std::cerr << opts.output_file_ << std::endl;
+		exit(EXIT_FAILURE);
+	}
 	if (opts.secondary_maps_exist_) {
 		populations.emplace_back(
 			std::make_pair(new Population(*(populations.front().first), 
@@ -125,6 +130,11 @@ int main(int argc, char **argv, char **envp) {
 						   new std::ofstream(opts.secondary_output_file_, 
 											 std::ios::out | 
 											 std::ios::trunc)));
+		if (!populations.back().second->is_open()) {
+			std::cerr << "Could not open output file: ";
+			std::cerr << opts.secondary_output_file_ << std::endl;
+			exit(EXIT_FAILURE);
+		}
 	}
 
 	/* Evolve the populations in tandem */
@@ -136,10 +146,7 @@ int main(int argc, char **argv, char **envp) {
 									 p.first->GetBestTreeSize(), 
 									 p.first->GetAverageTreeSize());
 			(*p.second) << "\n";
-			
-			if (i % 10 == 0) {
-				std::clog << "Generation " << i << " completed.\n";
-			}
+			std::clog << "Generation " << i << " completed.\n";
 			if (i % 100 == 0) {
 				std::clog << "Current best solution: \n";
 				std::clog << FormatOutput(p.first->GetBestFitness(),
@@ -183,7 +190,7 @@ int main(int argc, char **argv, char **envp) {
 		verification_output_file.close();
 	}
 
-	return 0;
+	return(EXIT_SUCCESS);
 }
 void ParseCommandLine(int argc, char **argv, Options &opts) {
 	/* Command Line Option Categories */

@@ -215,11 +215,21 @@ private:
 	 * weighted fitness score exists because parsimony pressure is used to
 	 * help prevent code growth.
 	 */
-	size_t SelectIndividual();
+	size_t SelectIndividual(double parsimony_coefficient);
 	/** 
 	 * Determine and set the indices of the two best individuals.
 	 */
 	void SetElite();
+	/**
+	 * Calculate the weighted fitness based on raw fitness, tree size and 
+	 * parsimony coefficient.
+	 */
+	double CalculateWeightedFitness(double raw_fitness, double parsimony,
+									double tree_size);
+	/** 
+	 * Determine the parsimony pressure for coming up with weighted fitnesses.
+	 */
+	double CalculateParsimonyCoefficient();
 	/**
 	 * A static random engine that can be shared throughout the entire class.
 	 * Based on the idea found in:
@@ -247,4 +257,6 @@ private:
 	double best_fitness_;
 	double worst_fitness_;
 	double avg_fitness_;
+
+	size_t best_weighted_index_;
 };

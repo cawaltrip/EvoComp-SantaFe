@@ -82,15 +82,15 @@ Population::Population(const Population &copy,
 }
 void Population::Evolve() {
 	std::vector<Individual> evolved_pop(pop_.size());
-	
 	evolved_pop[0] = pop_[best_index_];
 
 	/* Non-elite individual selection. */
+	double parsimony_coefficient = CalculateParsimonyCoefficient();
 	for (size_t i = 1; i < evolved_pop.size(); ++i) {
-		size_t p1 = SelectIndividual();
+		size_t p1 = SelectIndividual(parsimony_coefficient);
 		size_t p2;
 		do {
-			p2 = SelectIndividual();
+			p2 = SelectIndividual(parsimony_coefficient);
 		} while (p2 == p1);
 
 		Individual parent1(pop_[p1]);
@@ -234,9 +234,13 @@ void Population::Crossover(Individual *parent1, Individual *parent2) {
 	}
 	parent1->CorrectTree();
 }
-size_t Population::SelectIndividual() {
+size_t Population::SelectIndividual(double parsimony_coefficient) {
 	size_t winner;
 	size_t challenger;
+	double winner_fitness;
+	double challenger_fitness;
+	//double winner_weighted;
+	//double challenger_weighted;
 	bool fitness_based;
 	
 	/* Determine whether tournment is fitness or parsimony based */
@@ -246,14 +250,25 @@ size_t Population::SelectIndividual() {
 	/* Run the tournament */
 	std::uniform_int_distribution<size_t> d{ 0,pop_.size() - 1 };
 	winner = d(GetEngine());
-
+	//winner_weighted = CalculateWeightedFitness(
+	//	pop_[winner].GetFitness(),
+	//	parsimony_coefficient,
+	//	static_cast<double>(pop_[winner].GetTreeSize()));
+	winner_fitness = pop_[winner].GetFitness();
 	for (size_t i = 0; i < tournament_size_; ++i) {
 		do {
 			challenger = d(GetEngine());
 		} while (winner == challenger);
+
 		if (fitness_based) {
-			if (pop_[challenger].GetFitness() > pop_[winner].GetFitness()) {
-				winner = challenger; 
+		//	challenger_weighted = CalculateWeightedFitness(
+		//		pop_[challenger].GetFitness(),
+		//		parsimony_coefficient,
+		//		static_cast<double>(pop_[challenger].GetTreeSize()));
+			challenger_fitness = pop_[challenger].GetFitness();
+			if(challenger_fitness > winner_fitness) {
+				winner = challenger;
+				winner_fitness = challenger_fitness;
 			}
 		} else {
 			if (pop_[challenger].GetTreeSize() < pop_[winner].GetTreeSize()) {
@@ -271,6 +286,36 @@ void Population::SetElite() {
 			best_index_ = i;
 		}
 	}
+}
+double Population::CalculateWeightedFitness(double raw_fitness, 
+											double parsimony,
+											double tree_size) {
+	return (raw_fitness - (0.5 * parsimony * tree_size));
+}
+double Population::CalculateParsimonyCoefficient() {
+	double covariance = 0;
+	double variance = 0;
+	double parsimony = 0;
+
+	double Ex = 0;
+	int Ey = 0;
+	double Exy = 0;
+	double Exx = 0;
+	double Kx = pop_[0].GetFitness();
+	int Ky = static_cast<int>(pop_[0].GetTreeSize());
+
+	double pop_size = static_cast<double>(pop_.size());
+
+	for (auto p : pop_) {
+		Ex += (p.GetFitness() - Kx);
+		Ey += (static_cast<int>(p.GetTreeSize()) - Ky);
+		Exy += (p.GetFitness() - Kx) * (p.GetTreeSize() - Ky);
+		Exx += (p.GetFitness() - Kx) * (p.GetFitness() - Kx);
+	}
+	covariance = (Exy - Ex * static_cast<double>(Ey) / pop_size) / pop_size;
+	variance = (Exx - Ex * Ex / pop_size) / pop_size;
+	parsimony = (covariance / variance);
+	return parsimony;
 }
 std::mt19937 &Population::GetEngine() {
 	static std::random_device rd;

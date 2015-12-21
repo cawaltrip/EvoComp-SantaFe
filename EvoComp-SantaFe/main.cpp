@@ -68,18 +68,6 @@ namespace po = boost::program_options;
   *			contents of the file read in.
   */
 std::vector<std::string> ParseDataFile(std::string filename);
-/**
- * Write the fitness and tree information to the file stream object passed in.
- *
- * @param[out]	out					File stream object to write to.
- * @param[in]	best_fitness		The fitness score of the best indiviudal.
- * @param[in]	avg_fitness			The average fitness of the generation.
- * @param[in]	best_solution_size	Tree size of the best individual.
- * @param[in]	avg_size			Average tree size of the generation.
- */
-void WriteOutputFile(std::ofstream &out, double best_fitness,
-					  double avg_fitness, size_t best_solution_size,
-					  size_t avg_size);
 /** 
  * Return a string formatted to write to file.
  *
@@ -131,7 +119,6 @@ int main(int argc, char **argv, char **envp) {
 					   std::ofstream(opts.output_file_,
 									 std::ios::out | std::ios::trunc)));
 	if (opts.secondary_maps_exist_) {
-		/** @todo	Would secondary_output_file lose scope if declared here? */
 		populations.emplace_back(
 			std::make_pair(new Population(*(populations.front().first), 
 										  secondary_maps),
@@ -163,15 +150,24 @@ int main(int argc, char **argv, char **envp) {
 				std::clog << "\n";
 			}
 		}
-		}
+	}
 	for (auto p : populations) {
-		p.second.flush(); /* @todo	Does close() already do this? */
 		p.second.close();
 	}
-	/*
-	 * Evolution is done.  Write last of results to file.  If a verification 
-	 * map set exists, then run all the populations through the maps.
-	 */
+
+	/* GraphViz output if specified at the command line */
+	if (opts.graphviz_output_) {
+		std::ofstream graph_output_file(opts.graphviz_file_, 
+										std::ios::out | std::ios::trunc);
+		size_t counter = 0;
+		for (auto p : populations) {
+			std::string graph_name = "SantaFe" + std::to_string(counter++);
+			graph_output_file << p.first->GetBestSolutionGraphViz(graph_name);
+		}
+		graph_output_file.close();
+	}
+
+	/* Run verification maps if specified at the command line */
 	if (opts.verification_maps_exist_) {
 		std::ofstream verification_output_file;
 		verification_output_file.open(opts.verification_output_file_,
@@ -183,16 +179,13 @@ int main(int argc, char **argv, char **envp) {
 				p.first->GetBestFitness(), p.first->GetAverageFitness(),
 				p.first->GetBestTreeSize(), p.first->GetAverageTreeSize());
 		}
-		verification_output_file.flush();
 		verification_output_file.close();
 	}
 
 	return 0;
 }
 void ParseCommandLine(int argc, char **argv, Options &opts) {
-	/* Vector to hold return values */
-	std::vector<std::string> filenames;
-
+	/* Command Line Option Categories */
 	po::options_description basic_opts("Basic Options");
 	po::options_description pop_opts("Population Options");
 	po::options_description indiv_opts("Individual Options");
@@ -205,6 +198,7 @@ void ParseCommandLine(int argc, char **argv, Options &opts) {
 	basic_opts.add_options()
 		("help,h", "print this help and exit")
 		("verbose,v", "print extra logging information");
+	/* Population Options */
 	pop_opts.add_options()
 		("generations,g",
 		 po::value<size_t>(&opts.evolution_count_),
@@ -221,6 +215,7 @@ void ParseCommandLine(int argc, char **argv, Options &opts) {
 		("proportional-tournament-rate,r",
 		 po::value<double>(&opts.proportional_tournament_rate_),
 		 "Rate that tournament is fitness based instead of parsimony based.");
+	/*Individual Options */
 	indiv_opts.add_options()
 		("mutation,m", 
 		 po::value<double>(&opts.mutation_rate_),
@@ -234,6 +229,7 @@ void ParseCommandLine(int argc, char **argv, Options &opts) {
 		("max-depth,x", 
 		 po::value<size_t>(&opts.tree_depth_max_),
 		 "Maximum tree depth.");
+	/* Input/Output Options */
 	io_opts.add_options()
 		("input,I",
 		 po::value<std::vector<std::string>>(&opts.map_files_)->required(),
@@ -255,7 +251,7 @@ void ParseCommandLine(int argc, char **argv, Options &opts) {
 		("verification-output,W",
 		 po::value<std::string>(&opts.verification_output_file_),
 		 "Output file for verification GP population.");
-
+	/* All unspecified options are treated as input files */
 	positional_opts.add("input", -1);
 
 	cmd_opts.add(basic_opts).add(pop_opts).add(indiv_opts).add(io_opts);
@@ -263,14 +259,28 @@ void ParseCommandLine(int argc, char **argv, Options &opts) {
 	po::store(po::command_line_parser(argc, argv).options(cmd_opts)
 			  .positional(positional_opts).run(), vm);
 
+	/*
+	 * Help is checked before notify, because we don't want to create an
+	 * error if the user only specifies the help flag and doesn't set any
+	 * of the required flags (even though these have all been removed and 
+	 * replaced with default values.
+	 */
 	if (vm.count("help")) {
 		std::cout << GetUsageString(std::string(argv[0])) << std::endl;
 		std::cout << cmd_opts << std::endl;
 		exit(EXIT_SUCCESS);
 	}
 
+	/* 
+	 * Make sure all the options are properly set and error if required
+	 * fields are missing.
+	 */
 	po::notify(vm);
 	
+	/* 
+	 * Check all of the basic options for validity (such as input files 
+	 * existing 
+	 */
 	if (!vm.count("verbose")) {
 		std::clog.rdbuf(nullptr);
 	}
@@ -314,9 +324,9 @@ void ParseCommandLine(int argc, char **argv, Options &opts) {
 	}
 
 	if (vm.count("graphviz")) {
-		opts.graphviz_file_exists_ = true;
+		opts.graphviz_output_ = true;
 	} else {
-		opts.graphviz_file_exists_ = false;
+		opts.graphviz_output_ = false;
 	}
 }
 std::string GetUsageString(std::string program_name) {
@@ -342,12 +352,6 @@ std::vector<std::string> ParseDataFile(std::string filename) {
 		map_file_contents.push_back(line);
 	}
 	return map_file_contents;
-}
-void WriteOutputFile(std::ofstream &out, double best_fitness, 
-							 double avg_fitness, size_t best_solution_size, 
-							 size_t avg_size) {
-	out << best_fitness << "," << best_solution_size << ",";
-	out << avg_fitness << "," << avg_size << "\n";
 }
 std::string FormatOutput(double best_fitness, double avg_fitness, 
 					  size_t best_solution_size, size_t avg_size) {

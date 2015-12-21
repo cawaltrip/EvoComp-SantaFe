@@ -153,7 +153,7 @@ public:
 	void SetChild(size_t child_number, Node *child);
 	/** Returns the depth of this node in the tree. */
 	size_t GetCurrentDepth();
-	std::string CallGraphViz();
+	std::string CallGraphViz(std::string graph_name);
 private:
 	struct NodeWrapper {
 		Node* node;
@@ -174,7 +174,7 @@ private:
 	 */
 	std::mt19937 &GetEngine();
 	NodeWrapper* Structify(Node *root, int counter);
-	std::string GraphViz();
+	std::string GraphViz(std::string graph_name);
 
 	/** A pointer to the parent node or `nullptr` if the root of the tree */
 	Node *parent_;

@@ -114,7 +114,7 @@ public:
 	 */
 	std::vector<std::string> PrintSolvedMap(std::vector<TrailMap*> maps,
 											bool latex);
-	std::string CallGraphViz();
+	std::string CallGraphViz(std::string graph_name);
 private:
 	/**
 	 * A static random engine that can be shared throughout the entire class.

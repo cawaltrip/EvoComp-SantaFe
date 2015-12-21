@@ -276,8 +276,8 @@ void Node::SetChild(size_t child_number, Node *child) {
 size_t Node::GetCurrentDepth() {
 	return depth_;
 }
-std::string Node::CallGraphViz() {
-	return GraphViz();
+std::string Node::CallGraphViz(std::string graph_name) {
+	return GraphViz(graph_name);
 }
 std::mt19937 &Node::GetEngine() {
 	static std::random_device rd;
@@ -319,7 +319,7 @@ Node::NodeWrapper* Node::Structify(Node *n, int counter) {
 	}
 	return t;
 }
-std::string Node::GraphViz() {
+std::string Node::GraphViz(std::string graph_name) {
 	std::stringstream ss;
 	int counter = 0;
 	
@@ -328,7 +328,7 @@ std::string Node::GraphViz() {
 
 	stack.emplace_front(std::make_pair(Structify(this,counter), "null"));
 
-	ss << "digraph G {\n";
+	ss << "digraph " << graph_name << " {\n";
 
 	while (!stack.empty()) {
 		curr = stack.back();

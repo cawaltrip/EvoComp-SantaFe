@@ -189,8 +189,8 @@ double Population::GetAverageFitness() {
 std::vector<std::string> Population::GetBestSolutionMap(bool latex) {
 	return pop_[best_index_].PrintSolvedMap(maps_, latex);
 }
-std::string Population::GetBestSolutionGraphViz() {
-	return pop_[best_index_].CallGraphViz();
+std::string Population::GetBestSolutionGraphViz(std::string graph_name) {
+	return pop_[best_index_].CallGraphViz(graph_name);
 }
 void Population::RampedHalfAndHalf(size_t population_size, size_t depth_min, 
 								   size_t depth_max) {

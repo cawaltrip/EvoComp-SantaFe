@@ -80,6 +80,19 @@ std::vector<std::string> ParseDataFile(std::string filename);
 void WriteOutputFile(std::ofstream &out, double best_fitness,
 					  double avg_fitness, size_t best_solution_size,
 					  size_t avg_size);
+/** 
+ * Return a string formatted to write to file.
+ *
+ * @param[in]	best_fitness		The fitness score of the best indiviudal.
+ * @param[in]	avg_fitness			The average fitness of the generation.
+ * @param[in]	best_solution_size	Tree size of the best individual.
+ * @param[in]	avg_size			Average tree size of the generation.
+ *
+ * @return	The parameters separated by commas and formatted as 
+ *			a `std::string`.
+ */
+std::string FormatOutput(double best_fitness, double avg_fitness,
+							 size_t best_solution_size, size_t avg_size);
 /* 
  * All of the command line options are stored in this object and this object
  * is passed where needed to read the options.
@@ -130,11 +143,10 @@ int main(int argc, char **argv, char **envp) {
 	for (size_t i = 0; i < opts.evolution_count_; ++i) {
 		for (auto p : populations) {
 			p.first->Evolve();
-			WriteOutputFile(p.second,
-							p.first->GetBestFitness(), 
-							p.first->GetAverageFitness(), 
-							p.first->GetBestTreeSize(), 
-							p.first->GetAverageTreeSize());
+			p.second << FormatOutput(p.first->GetBestFitness(), 
+									 p.first->GetAverageFitness(), 
+									 p.first->GetBestTreeSize(), 
+									 p.first->GetAverageTreeSize());
 			p.second << "\n";
 			
 			if (i % 10 == 0) {
@@ -142,10 +154,10 @@ int main(int argc, char **argv, char **envp) {
 			}
 			if (i % 100 == 0) {
 				std::clog << "Current best solution: \n";
-				std::clog << FormatOutputFile(p.first->GetBestFitness(),
-											  p.first->GetAverageFitness(),
-											  p.first->GetBestTreeSize(),
-											  p.first->GetAverageTreeSize());
+				std::clog << FormatOutput(p.first->GetBestFitness(),
+										  p.first->GetAverageFitness(),
+										  p.first->GetBestTreeSize(),
+										  p.first->GetAverageTreeSize());
 				std::clog << "\n";
 				std::clog << p.first->GetBestSolutionGraphViz();
 				std::clog << "\n";
@@ -167,11 +179,9 @@ int main(int argc, char **argv, char **envp) {
 		for (auto p : populations) {
 			p.first->SetMaps(verification_maps);
 			p.first->CalculateFitness();
-			WriteOutputFile(verification_output_file,
-							p.first->GetBestFitness(),
-							p.first->GetAverageFitness(),
-							p.first->GetBestTreeSize(),
-							p.first->GetAverageTreeSize());
+			verification_output_file << FormatOutput(
+				p.first->GetBestFitness(), p.first->GetAverageFitness(),
+				p.first->GetBestTreeSize(), p.first->GetAverageTreeSize());
 		}
 		verification_output_file.flush();
 		verification_output_file.close();
@@ -338,4 +348,11 @@ void WriteOutputFile(std::ofstream &out, double best_fitness,
 							 size_t avg_size) {
 	out << best_fitness << "," << best_solution_size << ",";
 	out << avg_fitness << "," << avg_size << "\n";
+}
+std::string FormatOutput(double best_fitness, double avg_fitness, 
+					  size_t best_solution_size, size_t avg_size) {
+	std::stringstream ss;
+	ss << best_fitness << "," << best_solution_size << ",";
+	ss << avg_fitness << "," << avg_size;
+	return ss.str();
 }

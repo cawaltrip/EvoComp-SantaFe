@@ -48,6 +48,7 @@ Population::Population(size_t population_size, double mutation_rate,
 		std::swap(depth_min, depth_max);
 	}
 	RampedHalfAndHalf(population_size, depth_min, depth_max);
+	CalculateTreeSize();
 	CalculateFitness();
 }
 Population::Population(Options opts, std::vector<TrailMap*> maps) : 
@@ -100,6 +101,7 @@ void Population::Evolve() {
 		evolved_pop[i].Mutate(mutation_rate_);
 	}
 	this->pop_ = evolved_pop;
+	CalculateTreeSize();
 	CalculateFitness();
 }
 void Population::CalculateFitness() {

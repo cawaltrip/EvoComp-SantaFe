@@ -93,7 +93,7 @@ int main(int argc, char **argv, char **envp) {
 	std::vector<TrailMap*> maps;
 	std::vector<TrailMap*> secondary_maps;
 	std::vector<TrailMap*> verification_maps;
-	std::vector<std::pair<Population*,std::ofstream&>> populations;
+	std::vector<std::pair<Population*,std::ofstream*>> populations;
 
 	/* Create all the maps */
 	for (std::string fn : opts.map_files_) {
@@ -115,26 +115,27 @@ int main(int argc, char **argv, char **envp) {
 
 	/* Create the populations */
 	populations.emplace_back(
-		std::make_pair(new Population(opts, maps), 
-					   std::ofstream(opts.output_file_,
-									 std::ios::out | std::ios::trunc)));
+		std::make_pair(new Population(opts, maps),
+					   new std::ofstream(opts.output_file_,
+										 std::ios::out | std::ios::trunc)));
 	if (opts.secondary_maps_exist_) {
 		populations.emplace_back(
 			std::make_pair(new Population(*(populations.front().first), 
 										  secondary_maps),
-						   std::ofstream(opts.secondary_output_file_, 
-										 std::ios::out | std::ios::trunc)));
+						   new std::ofstream(opts.secondary_output_file_, 
+											 std::ios::out | 
+											 std::ios::trunc)));
 	}
 
 	/* Evolve the populations in tandem */
 	for (size_t i = 0; i < opts.evolution_count_; ++i) {
 		for (auto p : populations) {
 			p.first->Evolve();
-			p.second << FormatOutput(p.first->GetBestFitness(), 
+			(*p.second) << FormatOutput(p.first->GetBestFitness(), 
 									 p.first->GetAverageFitness(), 
 									 p.first->GetBestTreeSize(), 
 									 p.first->GetAverageTreeSize());
-			p.second << "\n";
+			(*p.second) << "\n";
 			
 			if (i % 10 == 0) {
 				std::clog << "Generation " << i << " completed.\n";
@@ -146,13 +147,13 @@ int main(int argc, char **argv, char **envp) {
 										  p.first->GetBestTreeSize(),
 										  p.first->GetAverageTreeSize());
 				std::clog << "\n";
-				std::clog << p.first->GetBestSolutionGraphViz();
-				std::clog << "\n";
+				//std::clog << p.first->GetBestSolutionGraphViz();
+				//std::clog << "\n";
 			}
 		}
 	}
 	for (auto p : populations) {
-		p.second.close();
+		p.second->close();
 	}
 
 	/* GraphViz output if specified at the command line */

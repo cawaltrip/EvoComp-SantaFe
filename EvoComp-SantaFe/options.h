@@ -30,7 +30,7 @@
  * the option parser and the main function for organization and cleanliness.
  */
 struct Options {
-	size_t evolution_count_ = 200;
+	size_t evolution_count_ = 20;
 	size_t population_size_ = 200;
 	size_t action_count_limit_ = 400;
 	double mutation_rate_ = 0.03;

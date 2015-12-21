@@ -177,6 +177,7 @@ public:
 	double GetAverageFitness();
 	/** Get a vector of all of the completed maps for the best solution. */
 	std::vector<std::string> GetBestSolutionMap(bool latex);
+	/** Create a GraphViz file that can be parsed by `dot` */
 	std::string GetBestSolutionGraphViz(std::string graph_name = "G");
 private:
 	/** 
@@ -217,7 +218,7 @@ private:
 	 */
 	size_t SelectIndividual(double parsimony_coefficient);
 	/** 
-	 * Determine and set the indices of the two best individuals.
+	 * Determine and set the indices of the single best individual.
 	 */
 	void SetElite();
 	/**

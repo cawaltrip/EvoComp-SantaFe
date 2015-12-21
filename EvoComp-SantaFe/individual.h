@@ -109,11 +109,27 @@ public:
 	 */
 	void SetRootNode(Node *root);
 	/**
-	 * Return a `std::string` representation of a map with the route the ant
+	 * Runs the `TrailMap::Ant` through each of the maps, leaving the map to
+	 * contain the path that was followed.
+	 *
+	 * @param[in]	maps	A list of maps to traverse.
+	 * @param[in]	latex	Add any necessary wrappings for importing into
+	 *						LaTeX (not currently used).
+	 * @return	A `std::string` representation of a map with the route the ant
 	 * traversed shown.
 	 */
 	std::vector<std::string> PrintSolvedMap(std::vector<TrailMap*> maps,
 											bool latex);
+	/** 
+	 * Wrapper to `Individual::root_::CallGraphViz()` and just sends the output
+	 * from that function back to the calling function.
+	 *
+	 * @param[in]	graph_name	The name of the digraph.
+	 *
+	 * @return	A `std::string` representing a GraphViz file that can be
+	 *			parsed by `dot` to create a visual representation of the
+	 *			solution tree.
+	 */
 	std::string CallGraphViz(std::string graph_name);
 private:
 	/**
@@ -139,6 +155,5 @@ private:
 	size_t original_max_depth_; /**< The original maximum depth of the tree. */
 	size_t terminal_count_;	/**< Number of terminal nodes in the tree. */
 	size_t nonterminal_count_; /**< Number of nonterminal nodes in the tree. */
-
 };
 

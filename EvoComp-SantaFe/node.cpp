@@ -284,7 +284,7 @@ std::mt19937 &Node::GetEngine() {
 	static std::mt19937 mt(rd());
 	return mt;
 }
-Node::NodeWrapper* Node::Structify(Node *n, int counter) {
+Node::NodeWrapper* Node::ConstructGraphVizNode(Node *n, int counter) {
 
 	Node::NodeWrapper *t = new Node::NodeWrapper();
 
@@ -323,16 +323,17 @@ std::string Node::GraphViz(std::string graph_name) {
 	std::stringstream ss;
 	int counter = 0;
 	
-	std::deque<std::pair<Node::NodeWrapper*, std::string>> stack;
+	std::deque<std::pair<Node::NodeWrapper*, std::string>> queue;
 	std::pair<Node::NodeWrapper*, std::string> curr;
 
-	stack.emplace_front(std::make_pair(Structify(this,counter), "null"));
+	queue.emplace_front(std::make_pair(
+		ConstructGraphVizNode(this,counter), "null"));
 
 	ss << "digraph " << graph_name << " {\n";
 
-	while (!stack.empty()) {
-		curr = stack.back();
-		stack.pop_back();
+	while (!queue.empty()) {
+		curr = queue.back();
+		queue.pop_back();
 
 		ss << "\t" << curr.first->node_name << " [shape=";
 		if (!curr.first->nonterminal) {
@@ -350,8 +351,8 @@ std::string Node::GraphViz(std::string graph_name) {
 
 		for (Node *child : curr.first->node->children_) {
 			++counter;
-			stack.emplace_front(std::make_pair(Structify(child, counter),
-											   curr.first->node_name));
+			queue.emplace_front(std::make_pair(
+				ConstructGraphVizNode(child, counter), curr.first->node_name));
 		}
 	}
 	ss << "}";

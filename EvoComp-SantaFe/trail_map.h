@@ -141,10 +141,10 @@ private:
 	 */
 	char ConvertTrailDataToChar(TrailData d);
 	/**
-	* Determine the total number of food in a given map.  This will only need
-	* to be called once at the creation of the `TrailMap` object because the
-	* food count is fixed.
-	*/
+	 * Determine the total number of food in a given map.  This will only need
+	 * to be called once at the creation of the `TrailMap` object because the
+	 * food count is fixed.
+	 */
 	void SetTotalFoodCount();
 	std::vector<std::vector<Cell>> map_;
 	size_t current_action_count_;

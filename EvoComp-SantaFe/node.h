@@ -38,8 +38,6 @@
  *
  * @todo	It would be nice to use actual constructors and destructors 
  *			instead of the `Copy()` and `Erase()` functions.
- * @todo	Determine what else (if anything) is necessary for the data
- *			portion of the data structure.
  */
 class Node {
 public:
@@ -85,10 +83,11 @@ public:
 	void Mutate(double mutation_chance, size_t max_depth);
 	/**
 	 * Evaluate the fitness of a node and its subtree.
-	 * @param[in]	&map		A reference to a map that's being evaluated.
+	 * @param[in]	*map		A pointer to a map that's being evaluated.
 	 *							The Individual and the TrailMap will know to
 	 *							stop execution and the Map will contain the
-	 *							number of food eaten.
+	 *							number of food eaten and path taken during
+	 *							execution.
 	 */
 	void Evaluate(TrailMap *map);
 	/**
@@ -98,6 +97,7 @@ public:
 	 * zero, the current node is returned as well its index in the child tree.
 	 * @param[in]	countdown	How many more nodes remain before selection.
 	 * @param[in]	nonterminal	Type of node to select.
+	 *
 	 * @return	Returns a pair consisting of the selected node as well as the
 	 *			index of the node in the node's parent's `children_` vector.
 	 */
@@ -114,6 +114,7 @@ public:
 	/** 
 	 * Determines if the current node is terminal.  Checks the operator type
 	 * of the node to determine if terminal or not.
+	 *
 	 * @return	True if a terminal operator type.
 	 */
 	bool IsTerminal();
@@ -153,13 +154,27 @@ public:
 	void SetChild(size_t child_number, Node *child);
 	/** Returns the depth of this node in the tree. */
 	size_t GetCurrentDepth();
+	/** 
+	 * Public accessor to the `Node::GraphViz` method.  Used to prevent having
+	 * to potentially expose the underlying data structures used to create
+	 * the strings.
+	 *
+	 * @param[in]	graph_name	The name to identify the digraph with.
+	 *
+	 * @return	A `std::string` representing a node and its subtree that can
+	 *			be read by GraphViz's `dot`.
+	 */
 	std::string CallGraphViz(std::string graph_name);
 private:
+	/**
+	 * Just a simple structure to help make sure that `Node::GraphViz()` can
+	 * properly create the nodes of the digraph.
+	 */
 	struct NodeWrapper {
-		Node* node;
-		std::string node_name; /* Mangled name for identification purposes */
-		std::string node_label; /* Label representing the type of node */
-		bool nonterminal; /* Terminal or nonterminal */
+		Node* node; /**< The node to be represented. */
+		std::string node_name; /*< Mangled name for unique identification. */
+		std::string node_label; /*< Label representing the type of node. */
+		bool nonterminal; /*< Used to define the node shape/style. */
 	};
 	/**
 	 * A static random engine that can be shared throughout the entire class.
@@ -173,7 +188,30 @@ private:
 	 * @return	A Mersenne Twister Engine seeded by `std::random_device`.
 	 */
 	std::mt19937 &GetEngine();
-	NodeWrapper* Structify(Node *root, int counter);
+
+	/** 
+	 * Create a NodeWrapper* object based on the root of the subtree and a
+	 * way to uniquely identify the node.
+	 *
+	 * @param[in]	root		The node to wrap.
+	 * @param[in]	counter		A very simplistic way to mangle the name to
+	 *							make sure that the edges between vertices are
+	 *							unique.
+	 *
+	 * @return	A `Node::NodeWrapper*` with information to create the GraphViz
+	 *			node.
+	 */
+	NodeWrapper* ConstructGraphVizNode(Node *root, int counter);
+	/** 
+	 * Creates a GraphViz file that can read by `dot` to create a visual
+	 * representation of the execution tree that the `TrailMap::Ant` will
+	 * follow.
+	 *
+	 * @param[in]	graph_name	The name of the digraph.
+	 *
+	 * @return `std::string` representing a file that can be parsed by `dot`
+	 *			that represents this node and its subtree.
+	 */
 	std::string GraphViz(std::string graph_name);
 
 	/** A pointer to the parent node or `nullptr` if the root of the tree */
@@ -187,6 +225,10 @@ private:
 	 * is used to help curb code growth.
 	 */
 	OpType op_;
+	/**
+	 * The current depth of the node.  Used when creating new subtrees during
+	 * the crossover/mutation operation.
+	 */
 	size_t depth_;
 
 	

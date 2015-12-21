@@ -29,8 +29,8 @@
  */
 /**
  * @todo	Go through and make sure documentation is updated everywhere.
- * @todo	Implement some sort of parsimony pressure in addition to or 
- *			instead of parsimony selection?
+ * @todo	Revamp the ToString() methods and determine if there's anything
+ *			that I'm using for LaTeX mode.
  */
 #include <fstream>
 #include <iostream>
@@ -51,7 +51,7 @@ namespace po = boost::program_options;
  * @param[in]	argv	List of command line arguments.
  * @param[out]	opts	Command line options that were specified.
  */
- void ParseCommandLine(int argc, char **argv, Options &opt);
+ void ParseCommandLine(int argc, char **argv, Options &opts);
  /**
   * Returns the utility usage syntax.
   * @param[in]	program_name	Name of the exectued program (i.e, argv[0]).

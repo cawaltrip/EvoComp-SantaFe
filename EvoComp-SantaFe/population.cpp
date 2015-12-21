@@ -239,8 +239,6 @@ size_t Population::SelectIndividual(double parsimony_coefficient) {
 	size_t challenger;
 	double winner_fitness;
 	double challenger_fitness;
-	//double winner_weighted;
-	//double challenger_weighted;
 	bool fitness_based;
 	
 	/* Determine whether tournment is fitness or parsimony based */
@@ -250,10 +248,12 @@ size_t Population::SelectIndividual(double parsimony_coefficient) {
 	/* Run the tournament */
 	std::uniform_int_distribution<size_t> d{ 0,pop_.size() - 1 };
 	winner = d(GetEngine());
-	//winner_weighted = CalculateWeightedFitness(
-	//	pop_[winner].GetFitness(),
-	//	parsimony_coefficient,
-	//	static_cast<double>(pop_[winner].GetTreeSize()));
+	/*
+	winner_fitness = CalculateWeightedFitness(
+		pop_[winner].GetFitness(),
+		parsimony_coefficient,
+		static_cast<double>(pop_[winner].GetTreeSize()));
+	*/
 	winner_fitness = pop_[winner].GetFitness();
 	for (size_t i = 0; i < tournament_size_; ++i) {
 		do {
@@ -261,11 +261,14 @@ size_t Population::SelectIndividual(double parsimony_coefficient) {
 		} while (winner == challenger);
 
 		if (fitness_based) {
-		//	challenger_weighted = CalculateWeightedFitness(
-		//		pop_[challenger].GetFitness(),
-		//		parsimony_coefficient,
-		//		static_cast<double>(pop_[challenger].GetTreeSize()));
+			/*
+			challenger_fitness = CalculateWeightedFitness(
+				pop_[challenger].GetFitness(),
+				parsimony_coefficient,
+				static_cast<double>(pop_[challenger].GetTreeSize()));
+			*/
 			challenger_fitness = pop_[challenger].GetFitness();
+
 			if(challenger_fitness > winner_fitness) {
 				winner = challenger;
 				winner_fitness = challenger_fitness;

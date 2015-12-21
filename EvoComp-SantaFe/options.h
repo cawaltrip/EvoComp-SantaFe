@@ -35,7 +35,7 @@ struct Options {
 	size_t action_count_limit_ = 500;
 	double mutation_rate_ = 0.03;
 	double nonterminal_crossover_rate_ = 0.90;
-	double proportional_tournament_rate_ = 0.65; /* Between 0 and 1 */
+	double proportional_tournament_rate_ = 0.7; /* Between 0 and 1 */
 	size_t tournament_size_ = 5;
 	size_t tree_depth_min_ = 3;
 	size_t tree_depth_max_ = 6;

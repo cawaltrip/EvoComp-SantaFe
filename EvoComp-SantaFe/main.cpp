@@ -186,6 +186,7 @@ int main(int argc, char **argv, char **envp) {
 			verification_output_file << FormatOutput(
 				p.first->GetBestFitness(), p.first->GetAverageFitness(),
 				p.first->GetBestTreeSize(), p.first->GetAverageTreeSize());
+			verification_output_file << "\n";
 		}
 		verification_output_file.close();
 	}
